@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  body { @apply bg-ivory text-charcoal font-sans; font-feature-settings: 'ss01'; }
+  ::selection { background: #3A2D24; color: #F6F2EC; }
+  :focus-visible { outline: 1px solid #9A7A55; outline-offset: 3px; }
+  img { user-select: none; -webkit-user-drag: none; }
+}
+
+@layer components {
+  .wrap { @apply mx-auto w-full max-w-[1560px] px-5 sm:px-8 lg:px-14; }
+  .eyebrow { @apply font-sans text-[11px] font-medium uppercase tracking-wide3 text-bronze; }
+  .display { @apply font-display font-light leading-[0.95] tracking-[-0.01em]; }
+  .caps { @apply font-caps uppercase tracking-wide2; }
+  .h-xl { @apply display text-[13vw] sm:text-[10vw] lg:text-[8.2vw]; }
+  .h-lg { @apply display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl; }
+  .h-md { @apply display text-4xl sm:text-5xl lg:text-6xl; }
+  .lead { @apply text-[15px] leading-[1.8] text-warm sm:text-base; }
+
+  .btn { @apply relative inline-flex items-center gap-3 overflow-hidden border px-7 py-4 text-[11px] font-medium uppercase tracking-wide3 transition-colors duration-500 ease-lux; }
+  .btn::before { content: ''; @apply absolute inset-0 origin-bottom scale-y-0 transition-transform duration-500 ease-lux; z-index: -1; }
+  .btn:hover::before { @apply scale-y-100; }
+  .btn > * { position: relative; }
+  .btn-dark { @apply border-charcoal bg-charcoal text-ivory; isolation: isolate; }
+  .btn-dark::before { @apply bg-brown; }
+  .btn-light { @apply border-ivory/70 text-ivory; isolation: isolate; }
+  .btn-light::before { @apply bg-ivory; }
+  .btn-light:hover { @apply text-charcoal; }
+  .btn-line { @apply border-charcoal/30 text-charcoal; isolation: isolate; }
+  .btn-line::before { @apply bg-charcoal; }
+  .btn-line:hover { @apply text-ivory; }
+
+  .ulink { @apply relative inline-block; }
+  .ulink::after { content: ''; @apply absolute -bottom-0.5 left-0 h-px w-full origin-right scale-x-0 bg-current transition-transform duration-500 ease-lux; }
+  .ulink:hover::after, .ulink.active::after { @apply origin-left scale-x-100; }
+
+  .field { @apply w-full border-0 border-b border-charcoal/20 bg-transparent px-0 py-3 text-[15px] text-charcoal placeholder:text-taupe focus:border-charcoal focus:outline-none focus:ring-0; }
+  .label { @apply mb-1 block text-[10px] font-medium uppercase tracking-wide3 text-warm; }
+  .rule { @apply h-px w-full bg-charcoal/10; }
+  .arrow { @apply inline-block transition-transform duration-500 ease-lux; }
+  .group:hover .arrow { transform: translateX(6px); }
+}
+
+/* image hover: zoom, overlay, title, arrow */
+.tile img { transition: transform 1.4s cubic-bezier(.22,.8,.2,1); }
+.tile:hover img { transform: scale(1.05); }
+.tile .tile-shade { background: linear-gradient(to top, rgba(18,17,16,.55), rgba(18,17,16,0) 55%); transition: opacity .8s; }
+.tile .tile-meta { transition: transform .8s cubic-bezier(.22,.8,.2,1), opacity .8s; }
+@media (hover: hover) {
+  .tile .tile-hide { opacity: 0; transform: translateY(10px); }
+  .tile:hover .tile-hide { opacity: 1; transform: none; }
+}
+
+/* page transition */
+/* opacity only: a transform on <main> would break ScrollTrigger pinning */
+@keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+.page-in { animation: pageIn .9s cubic-bezier(.22,.8,.2,1) backwards; }
+@keyframes curtain { 0% { transform: scaleY(1); transform-origin: top; } 100% { transform: scaleY(0); transform-origin: top; } }
+.curtain { animation: curtain .8s cubic-bezier(.76,0,.24,1) both; }
+
+/* cursor */
+.cursor { position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; mix-blend-mode: normal; }
+.cursor-dot { width: 10px; height: 10px; border-radius: 999px; background: #1D1B19; transform: translate(-50%, -50%); transition: width .5s cubic-bezier(.22,.8,.2,1), height .5s cubic-bezier(.22,.8,.2,1), background .4s, opacity .3s; display: grid; place-items: center; }
+.cursor-dot span { font: 500 9px/1 Manrope, sans-serif; letter-spacing: .22em; color: #F6F2EC; opacity: 0; transition: opacity .3s; }
+.cursor.is-label .cursor-dot { width: 84px; height: 84px; background: rgba(29,27,25,.86); backdrop-filter: blur(4px); }
+.cursor.is-label .cursor-dot span { opacity: 1; }
+.cursor.is-link .cursor-dot { width: 36px; height: 36px; background: rgba(154,122,85,.25); }
+.cursor.on-dark .cursor-dot { background: #F6F2EC; }
+@media (hover: none) { .cursor { display: none; } }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* prose for CMS text */
+.prose-gm p { margin: 0 0 1.2em; line-height: 1.85; color: #6F675F; white-space: pre-line; }

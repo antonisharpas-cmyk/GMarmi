@@ -1,0 +1,87 @@
+import { lazy, Suspense, useEffect } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { LangProvider } from './lib/i18n';
+import { SiteProvider } from './lib/site';
+import { ScrollTrigger, scrollTop, startSmoothScroll, stopSmoothScroll } from './lib/motion';
+import { track } from './lib/api';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Cursor from './components/Cursor';
+import ChatWidget from './components/ChatWidget';
+import { EnquiryProvider } from './components/EnquiryDrawer';
+import { Loading, NotFoundBlock } from './components/ui';
+import Home from './pages/Home';
+import Materials from './pages/Materials';
+import Product from './pages/Product';
+import { DetailPage, ListPage } from './pages/Sections';
+import { About, Contact, Faq, Legal, LinkPage } from './pages/Info';
+
+const Admin = lazy(() => import('./admin/Admin'));
+
+function PublicRoutes() {
+  return (
+    <Routes>
+      <Route index element={<Home />} />
+      <Route path="materials" element={<Materials />} />
+      <Route path="materials/:cat" element={<Materials />} />
+      <Route path="materials/:cat/:slug" element={<Product />} />
+      <Route path="collections" element={<ListPage kind="collection" />} />
+      <Route path="collections/:slug" element={<DetailPage kind="collection" />} />
+      <Route path="applications" element={<ListPage kind="application" />} />
+      <Route path="applications/:slug" element={<DetailPage kind="application" />} />
+      <Route path="projects" element={<ListPage kind="project" />} />
+      <Route path="projects/:slug" element={<DetailPage kind="project" />} />
+      <Route path="about" element={<About />} />
+      <Route path="contact" element={<Contact />} />
+      <Route path="faq" element={<Faq />} />
+      <Route path="privacy" element={<Legal k="privacy" />} />
+      <Route path="cookies" element={<Legal k="cookies" />} />
+      <Route path="terms" element={<Legal k="terms" />} />
+      <Route path="link" element={<LinkPage />} />
+      <Route path="*" element={<NotFoundBlock />} />
+    </Routes>
+  );
+}
+
+function Site() {
+  const { pathname } = useLocation();
+  const bare = /\/link$/.test(pathname);
+  useEffect(() => { startSmoothScroll(); return () => stopSmoothScroll(); }, []);
+  useEffect(() => {
+    scrollTop();
+    track('page_view');
+    const id = setTimeout(() => ScrollTrigger.refresh(), 400);
+    return () => clearTimeout(id);
+  }, [pathname]);
+  return (
+    <LangProvider>
+      <SiteProvider>
+        <EnquiryProvider>
+          {!bare && <Header />}
+          <main key={pathname} className="page-in min-h-screen">
+            <Routes>
+              <Route path="/el/*" element={<PublicRoutes />} />
+              <Route path="/*" element={<PublicRoutes />} />
+            </Routes>
+          </main>
+          <div key={`c${pathname}`} className="curtain pointer-events-none fixed inset-0 z-[80] bg-charcoal" aria-hidden />
+          {!bare && <Footer />}
+          <ChatWidget />
+          <Cursor />
+        </EnquiryProvider>
+      </SiteProvider>
+    </LangProvider>
+  );
+}
+
+export default function App() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith('/admin')) {
+    return (
+      <Suspense fallback={<Loading />}>
+        <Admin />
+      </Suspense>
+    );
+  }
+  return <Site />;
+}
