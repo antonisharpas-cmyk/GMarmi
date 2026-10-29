@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
-import { Badge, Btn, Card, ENQ_TYPES, fmtDate, Input, MeCtx, PageHead, Sel, ToastProvider, useLoad, useMe, useToast, type Me } from './common';
+import { Badge, Btn, Card, ENQ_TYPES, fmtDate, Input, PasswordInput, MeCtx, PageHead, Sel, ToastProvider, useLoad, useMe, useToast, type Me } from './common';
 import { EntityEdit, EntityList, TYPES } from './Entities';
 import MediaLibrary from './Media';
 import Content from './Content';
@@ -16,7 +16,7 @@ function Login({ onIn }: { onIn: (m: Me) => void }) {
         <img src="/brand/logo-dark.png" alt="G. M. Andreou Marmi" className="mx-auto mb-12 w-44" />
         <div className="space-y-4">
           <Input type="email" placeholder="Email" autoComplete="username" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
-          <Input type="password" placeholder="Password" autoComplete="current-password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} />
+          <PasswordInput placeholder="Password" autoComplete="current-password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} />
           {err && <p className="text-sm text-[#8a3b2a]">{err}</p>}
           <Btn className="w-full justify-center py-3.5">Sign in</Btn>
         </div>
@@ -92,7 +92,7 @@ function Users() {
             <Input placeholder="Name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
             <Input placeholder="Email" type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
             <Sel value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })} options={roles} />
-            <Input placeholder="Temporary password" type="text" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} />
+            <PasswordInput placeholder="Temporary password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} />
             <Btn className="w-full justify-center">Add user</Btn>
           </form>
         </Card>
@@ -109,8 +109,8 @@ function Account() {
       <PageHead title="My account" />
       <Card title="Change password" className="max-w-md">
         <form className="space-y-3" onSubmit={async (e) => { e.preventDefault(); try { await api('/api/admin/me/password', { method: 'PUT', json: f }); toast('Password changed'); setF({ current: '', next: '' }); } catch (x: any) { toast(x.message, 'err'); } }}>
-          <Input type="password" placeholder="Current password" value={f.current} onChange={(e) => setF({ ...f, current: e.target.value })} />
-          <Input type="password" placeholder="New password (10+ characters)" value={f.next} onChange={(e) => setF({ ...f, next: e.target.value })} />
+          <PasswordInput placeholder="Current password" autoComplete="current-password" value={f.current} onChange={(e) => setF({ ...f, current: e.target.value })} />
+          <PasswordInput placeholder="New password (10+ characters)" autoComplete="new-password" value={f.next} onChange={(e) => setF({ ...f, next: e.target.value })} />
           <Btn>Update</Btn>
         </form>
       </Card>

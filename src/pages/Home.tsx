@@ -56,10 +56,10 @@ function Intro({ words, images }: { words: string[]; images: Img[] }) {
     if (!ref.current || r) return;
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ scrollTrigger: { trigger: ref.current, start: 'top top', end: '+=320%', scrub: 1, pin: true, anticipatePin: 1 } });
-      gsap.set('.iw', { yPercent: 110 });
+      gsap.set('.iw-1, .iw-2', { yPercent: 110 });
       tl.fromTo('.ii-0', { clipPath: 'inset(30% 34% 30% 34%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'power2.inOut' }, 0)
         .fromTo('.ii-0 img', { scale: 1.4 }, { scale: 1, duration: 1.2, ease: 'power2.inOut' }, '<')
-        .to('.iw-0', { yPercent: 0, duration: 0.5 }, '-=0.3')
+        .fromTo('.iw0-wrap', { scale: 1 }, { scale: 1.45, duration: 1.2, ease: 'power2.inOut' }, '<')
         .to('.iw-0', { yPercent: -110, duration: 0.5 }, '+=0.2')
         .fromTo('.ii-1', { clipPath: 'inset(0% 0% 0% 100%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1, ease: 'power2.inOut' }, '<')
         .fromTo('.ii-1 img', { xPercent: 20, scale: 1.2 }, { xPercent: 0, scale: 1, duration: 1, ease: 'power2.inOut' }, '<')
@@ -85,10 +85,18 @@ function Intro({ words, images }: { words: string[]; images: Img[] }) {
         <div key={img.id} className={`ii-${i} absolute inset-0 overflow-hidden`} style={{ clipPath: i === 0 ? undefined : 'inset(0 0 0 100%)' }}>
           <Picture img={img} sizes="100vw" />
           <div className="absolute inset-0 bg-ink/45" />
+          {i === 0 && (
+            // first word lives inside the small picture, so it is always within it, and grows with it
+            <div className="iw0-wrap absolute inset-0 flex items-center justify-center text-ivory [text-shadow:0_4px_40px_rgba(18,17,16,.35)]">
+              <div className="overflow-hidden">
+                <div className="iw iw-0 display whitespace-nowrap pb-[0.12em] text-[7.5vw] lg:text-[6.5vw]">{words[0]}</div>
+              </div>
+            </div>
+          )}
         </div>
       ))}
       <div className="iwords pointer-events-none absolute inset-0 flex items-center justify-center text-ivory [text-shadow:0_4px_40px_rgba(18,17,16,.35)]">
-        {words.slice(0, 3).map((w, i) => (
+        {words.slice(0, 3).map((w, i) => i === 0 ? null : (
           <div key={w} className="absolute overflow-hidden">
             <div className={`iw iw-${i} display whitespace-nowrap pb-[0.12em] ${w.length > 7 ? 'text-[13vw] sm:text-[11vw] lg:text-[9vw]' : 'text-[17vw] sm:text-[13vw] lg:text-[10.5vw]'}`}>{w}</div>
           </div>

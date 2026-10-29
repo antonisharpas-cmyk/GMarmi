@@ -43,6 +43,23 @@ export const Btn = ({ kind = 'dark', className = '', ...p }: React.ButtonHTMLAtt
 );
 
 export const Input = (p: React.InputHTMLAttributes<HTMLInputElement>) => <input {...p} className={`w-full border border-charcoal/15 bg-white px-3 py-2.5 text-sm outline-none focus:border-charcoal ${p.className || ''}`} />;
+/** Password field with an eye button to show or hide what was typed */
+export function PasswordInput(p: React.InputHTMLAttributes<HTMLInputElement>) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <Input {...p} type={show ? 'text' : 'password'} className={`pr-11 ${p.className || ''}`} />
+      <button type="button" onClick={() => setShow((s) => !s)} aria-label={show ? 'Hide password' : 'Show password'} title={show ? 'Hide password' : 'Show password'}
+        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-taupe transition-colors hover:text-charcoal">
+        {show ? (
+          <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.1A9.9 9.9 0 0112 5c5 0 9 4.5 10 7a12.4 12.4 0 01-3.1 4.2M6.6 6.6C4.3 8 2.7 10.2 2 12c1 2.5 5 7 10 7 1.7 0 3.3-.5 4.6-1.2" /></svg>
+        ) : (
+          <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 12c1-2.5 5-7 10-7s9 4.5 10 7c-1 2.5-5 7-10 7S3 14.5 2 12z" /><circle cx="12" cy="12" r="3" /></svg>
+        )}
+      </button>
+    </div>
+  );
+}
 export const Area = (p: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => <textarea {...p} className={`w-full border border-charcoal/15 bg-white px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-charcoal ${p.className || ''}`} />;
 export const Sel = ({ options, ...p }: React.SelectHTMLAttributes<HTMLSelectElement> & { options: { value: string | number; label: string }[] }) => (
   <select {...p} className={`w-full border border-charcoal/15 bg-white px-3 py-2.5 text-sm outline-none focus:border-charcoal ${p.className || ''}`}>

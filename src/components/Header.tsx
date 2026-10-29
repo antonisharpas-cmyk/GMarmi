@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useLang, switchPath } from '../lib/i18n';
 import { useSite } from '../lib/site';
-import { scrollLock } from '../lib/motion';
+import { scrollLock, scrollTopSmooth } from '../lib/motion';
 import { useEnquiry } from './EnquiryDrawer';
 
 const OVERLAY = [/^\/$/, /^\/about$/, /^\/contact$/, /^\/collections\/[^/]+$/, /^\/applications\/[^/]+$/, /^\/projects\/[^/]+$/, /^\/materials\/[^/]+$/];
@@ -42,6 +42,12 @@ export default function Header() {
     return () => window.removeEventListener('scroll', on);
   }, []);
   useEffect(() => { setMenu(false); }, [pathname]);
+  // clicking the page you are already on closes the menu and takes you back to the top
+  const same = (to: string) => () => {
+    if (to !== pathname) return;
+    setMenu(false);
+    setTimeout(scrollTopSmooth, 50);
+  };
   useEffect(() => { scrollLock(menu); }, [menu]);
 
   const light = overlay && !scrolled && !menu;
@@ -57,12 +63,12 @@ export default function Header() {
           scrolled && !menu ? 'bg-ivory/90 shadow-[0_1px_0_rgba(29,27,25,.06)] backdrop-blur-md' : 'bg-transparent'} ${light ? 'text-ivory' : 'text-charcoal'}`}
       >
         <div className={`wrap flex items-center justify-between transition-all duration-700 ${scrolled ? 'h-[68px]' : 'h-[88px]'}`}>
-          <Link to={lp('/')} aria-label="G. M. Andreou Marmi, home" className="relative z-10 block w-[118px] sm:w-[136px]" data-cursor="link">
+          <Link to={lp('/')} onClick={same(lp('/'))} aria-label="G. M. Andreou Marmi, home" className="relative z-10 block w-[118px] sm:w-[136px]" data-cursor="link">
             <img src={light ? '/brand/logo-light.png' : '/brand/logo-dark.png'} alt="G. M. Andreou Marmi Ltd" className="w-full" />
           </Link>
           <nav className="hidden items-center gap-6 xl:flex 2xl:gap-8">
             {nav.map(([p, l]) => (
-              <NavLink key={p} to={lp(p)} end={p === '/'} className={({ isActive }) => `ulink text-[11px] font-medium uppercase tracking-wide2 ${isActive ? 'active' : ''}`}>
+              <NavLink key={p} to={lp(p)} onClick={same(lp(p))} end={p === '/'} className={({ isActive }) => `ulink text-[11px] font-medium uppercase tracking-wide2 ${isActive ? 'active' : ''}`}>
                 {l}
               </NavLink>
             ))}
@@ -91,7 +97,7 @@ export default function Header() {
         <div className="wrap flex h-full flex-col justify-between pb-10 pt-28">
           <nav className="flex flex-col gap-1">
             {nav.map(([p, l], i) => (
-              <Link key={p} to={lp(p)} className="display text-[11vw] leading-[1.1] sm:text-6xl" style={{ transition: `opacity .6s ${0.15 + i * 0.05}s, transform .9s cubic-bezier(.22,.8,.2,1) ${0.15 + i * 0.05}s`, opacity: menu ? 1 : 0, transform: menu ? 'none' : 'translateY(30px)' }}>
+              <Link key={p} to={lp(p)} onClick={same(lp(p))} className="display text-[11vw] leading-[1.1] sm:text-6xl" style={{ transition: `opacity .6s ${0.15 + i * 0.05}s, transform .9s cubic-bezier(.22,.8,.2,1) ${0.15 + i * 0.05}s`, opacity: menu ? 1 : 0, transform: menu ? 'none' : 'translateY(30px)' }}>
                 {l}
               </Link>
             ))}

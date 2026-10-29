@@ -7,15 +7,20 @@ import { ImageManager, SingleImage } from './Media';
 
 type S = { k: string; label: string; t: 'text' | 'area' | 'img' | 'imgs' | 'lines' | 'bool' | 'rel' | 'multi' | 'why' | 'sections'; bi?: boolean; rel?: string; hint?: string; rows?: number };
 
-const TABS: Record<string, { title: string; key: string; groups: { title: string; fields: S[] }[] }> = {
+type G = { title: string; fields: S[]; section?: string; note?: { text: string; to: string; label: string } };
+const TABS: Record<string, { title: string; key: string; groups: G[] }> = {
   home: { title: 'Homepage', key: 'home', groups: [
     { title: 'Sections (drag to reorder, toggle to hide)', fields: [{ k: 'sections', label: '', t: 'sections' }] },
-    { title: 'Hero', fields: [{ k: 'hero_image', label: 'Hero image', t: 'img' }, { k: 'hero_kicker', label: 'Small line above title', t: 'text', bi: true }, { k: 'hero_title', label: 'Title', t: 'text', bi: true }, { k: 'hero_sub', label: 'Subtitle', t: 'area', bi: true }, { k: 'cta_primary', label: 'Primary button', t: 'text', bi: true }, { k: 'cta_secondary', label: 'Secondary button', t: 'text', bi: true }] },
-    { title: 'Stone. Surface. Space.', fields: [{ k: 'intro_words', label: 'Three words (one per line)', t: 'lines', bi: true }, { k: 'intro_images', label: 'Three images, in order', t: 'imgs' }] },
-    { title: 'Material story', fields: [{ k: 'story_image', label: 'Image', t: 'img' }, { k: 'story_lines', label: 'Lines (first is small, last is the link)', t: 'lines', bi: true }] },
-    { title: 'Featured collection and materials', fields: [{ k: 'featured_collection', label: 'Featured collection', t: 'rel', rel: 'collection' }, { k: 'featured_products', label: 'Featured materials (in this order)', t: 'multi', rel: 'product' }] },
-    { title: 'Why GM Andreou Marmi', fields: [{ k: 'why', label: '', t: 'why' }] },
-    { title: 'Final call to action', fields: [{ k: 'cta_title', label: 'Title', t: 'text', bi: true }, { k: 'cta_button', label: 'Button', t: 'text', bi: true }, { k: 'cta_image', label: 'Background image', t: 'img' }] },
+    { section: 'hero', title: 'Hero', fields: [{ k: 'hero_image', label: 'Hero image', t: 'img' }, { k: 'hero_kicker', label: 'Small line above title', t: 'text', bi: true }, { k: 'hero_title', label: 'Title', t: 'text', bi: true }, { k: 'hero_sub', label: 'Subtitle', t: 'area', bi: true }, { k: 'cta_primary', label: 'Primary button', t: 'text', bi: true }, { k: 'cta_secondary', label: 'Secondary button', t: 'text', bi: true }] },
+    { section: 'intro', title: 'Stone. Surface. Space.', fields: [{ k: 'intro_words', label: 'Three words (one per line)', t: 'lines', bi: true }, { k: 'intro_images', label: 'Three images, in order', t: 'imgs' }] },
+    { section: 'materials', title: 'Materials (horizontal)', fields: [], note: { text: 'Shows the published material categories, in the order set under Categories.', to: '/admin/content/category', label: 'Edit categories' } },
+    { section: 'story', title: 'Material story', fields: [{ k: 'story_image', label: 'Image', t: 'img' }, { k: 'story_lines', label: 'Lines (first is small, last is the link)', t: 'lines', bi: true }] },
+    { section: 'collection', title: 'Featured collection', fields: [{ k: 'featured_collection', label: 'Featured collection', t: 'rel', rel: 'collection' }] },
+    { section: 'applications', title: 'Applications', fields: [], note: { text: 'Shows the first six published applications, in the order set under Applications.', to: '/admin/content/application', label: 'Edit applications' } },
+    { section: 'showcase', title: 'Featured materials', fields: [{ k: 'featured_products', label: 'Featured materials (in this order)', t: 'multi', rel: 'product' }] },
+    { section: 'projects', title: 'Projects', fields: [], note: { text: 'Shows the first four published projects. The section stays hidden on the website until a project is added.', to: '/admin/content/project', label: 'Edit projects' } },
+    { section: 'why', title: 'Why GM Andreou Marmi', fields: [{ k: 'why', label: '', t: 'why' }] },
+    { section: 'cta', title: 'Final call to action', fields: [{ k: 'cta_title', label: 'Title', t: 'text', bi: true }, { k: 'cta_button', label: 'Button', t: 'text', bi: true }, { k: 'cta_image', label: 'Background image', t: 'img' }] },
   ] },
   site: { title: 'Contact, social and footer', key: 'site', groups: [
     { title: 'Contact', fields: [{ k: 'phone', label: 'Phone (display)', t: 'text' }, { k: 'phone_raw', label: 'Phone (for dialling, no spaces)', t: 'text' }, { k: 'email', label: 'Email', t: 'text' }, { k: 'address', label: 'Address', t: 'text', bi: true }, { k: 'hours', label: 'Opening hours', t: 'area', bi: true, hint: 'Hidden on the website while empty' }, { k: 'map_query', label: 'Google Maps search text', t: 'text' }, { k: 'contact_image', label: 'Contact page background image', t: 'img' }] },
@@ -118,13 +123,24 @@ export default function Content() {
         {Object.entries(TABS).map(([k, t]) => <Link key={k} to={`/admin/website/${k}`} className={`-mb-px border-b-2 px-4 py-3 text-[11px] uppercase tracking-wide2 ${tab === k ? 'border-charcoal' : 'border-transparent text-warm'}`}>{t.title}</Link>)}
       </div>
       <div className="space-y-6">
-        {cfg.groups.map((g) => (
-          <Card key={g.title} title={g.title}>
+        {(() => {
+          // homepage groups follow the same order as the sections on the website (and update when you drag them)
+          const order: any[] = tab === 'home' ? v.sections || [] : [];
+          const pos = (g: G) => (g.section ? order.findIndex((x) => x.key === g.section) : -1);
+          return [...cfg.groups].sort((a, b) => (a.section && b.section ? pos(a) - pos(b) : 0));
+        })().map((g) => {
+          const sec = tab === 'home' && g.section ? (v.sections || []).find((x: any) => x.key === g.section) : null;
+          const num = sec ? (v.sections || []).indexOf(sec) + 1 : 0;
+          return (
+          <Card key={g.title} title={num ? `${String(num).padStart(2, '0')} · ${g.title}` : g.title} className={sec && !sec.visible ? 'opacity-60' : ''}
+            action={sec && !sec.visible ? <span className="text-[10px] uppercase tracking-wide2 text-taupe">Hidden on website</span> : undefined}>
+            {g.note && <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-warm"><span>{g.note.text}</span><Link to={g.note.to} className="text-[11px] uppercase tracking-wide2 text-charcoal underline underline-offset-4">{g.note.label} →</Link></div>}
             <div className="grid gap-5 md:grid-cols-2">
               {g.fields.map((f) => <Field key={f.k} label={f.label ? `${f.label}${f.bi ? ` (${lang.toUpperCase()})` : ''}` : ''} hint={f.hint} className={['area', 'imgs', 'why', 'sections', 'multi'].includes(f.t) ? 'md:col-span-2' : ''}>{render(f)}</Field>)}
             </div>
           </Card>
-        ))}
+          );
+        })}
       </div>
     </>
   );

@@ -25,6 +25,10 @@ export function scrollTop() {
   if (lenis) lenis.scrollTo(0, { immediate: true });
   else window.scrollTo(0, 0);
 }
+export function scrollTopSmooth() {
+  if (lenis) lenis.scrollTo(0, { duration: 1.2 });
+  else window.scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' });
+}
 export function scrollLock(lock: boolean) {
   if (lenis) (lock ? lenis.stop() : lenis.start());
   document.documentElement.style.overflow = lock ? 'hidden' : '';

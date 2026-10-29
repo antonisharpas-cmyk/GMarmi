@@ -79,10 +79,48 @@ export function Contact() {
         </div>
         <div className="order-1 lg:order-2 lg:col-span-7 lg:col-start-6"><EnquiryForm /></div>
       </section>
+      <ContactFaq />
       <section className="relative h-[60vh] min-h-[380px] bg-stone">
         <iframe title="Map" src={map} className="h-full w-full" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
       </section>
     </>
+  );
+}
+
+function FaqItem({ f, open, onToggle }: { f: Entry; open: boolean; onToggle: () => void }) {
+  const { lang } = useLang();
+  return (
+    <div className="border-t border-charcoal/10">
+      <button onClick={onToggle} className="flex w-full items-center justify-between gap-6 py-6 text-left" aria-expanded={open}>
+        <span className="font-display text-2xl font-light">{f[`q_${lang}`] || f.q_en}</span>
+        <span className={`text-xl transition-transform duration-500 ${open ? 'rotate-45' : ''}`}>+</span>
+      </button>
+      <div className={`grid transition-all duration-700 ease-lux ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+        <div className="overflow-hidden"><p className="max-w-2xl pb-8 leading-[1.8] text-warm">{f[`a_${lang}`] || f.a_en}</p></div>
+      </div>
+    </div>
+  );
+}
+
+// Short FAQ block on the Contact page, above the map
+function ContactFaq() {
+  const { t, lp } = useLang();
+  const { data } = useApi<Entry[]>('/api/entries/faq');
+  const [open, setOpen] = useState<number | null>(null);
+  if (!data?.length) return null;
+  return (
+    <section className="bg-marble py-24 sm:py-32">
+      <div className="wrap grid gap-12 lg:grid-cols-12">
+        <div className="lg:col-span-4">
+          <div className="eyebrow mb-6">{t('faq')}</div>
+          <RiseText as="h2" className="h-md max-w-[12ch]">{t('faqTitle')}</RiseText>
+          {<Link to={lp('/faq')} className="group ulink mt-10 inline-block text-[11px] font-medium uppercase tracking-wide3">{t('viewAll')} <span className="arrow">→</span></Link>}
+        </div>
+        <div className="border-b border-charcoal/10 lg:col-span-7 lg:col-start-6">
+          {data.slice(0, 5).map((f) => <FaqItem key={f.id} f={f} open={open === f.id} onToggle={() => setOpen(open === f.id ? null : f.id)} />)}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -100,15 +138,7 @@ export function Faq() {
           <div key={c} className="mb-16">
             <div className="eyebrow mb-6">{t(`fq_${c}` as any) || c}</div>
             {data.filter((f) => (f.category || 'general') === c).map((f) => (
-              <div key={f.id} className="border-t border-charcoal/10">
-                <button onClick={() => setOpen(open === f.id ? null : f.id)} className="flex w-full items-center justify-between gap-6 py-6 text-left" aria-expanded={open === f.id}>
-                  <span className="font-display text-2xl font-light">{f[`q_${lang}`] || f.q_en}</span>
-                  <span className={`text-xl transition-transform duration-500 ${open === f.id ? 'rotate-45' : ''}`}>+</span>
-                </button>
-                <div className={`grid transition-all duration-700 ease-lux ${open === f.id ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-                  <div className="overflow-hidden"><p className="max-w-2xl pb-8 leading-[1.8] text-warm">{f[`a_${lang}`] || f.a_en}</p></div>
-                </div>
-              </div>
+              <FaqItem key={f.id} f={f} open={open === f.id} onToggle={() => setOpen(open === f.id ? null : f.id)} />
             ))}
           </div>
         ))}
