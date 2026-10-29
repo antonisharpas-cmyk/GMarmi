@@ -46,7 +46,7 @@ export function ProductGrid({ items }: { items: Entry[] }) {
 }
 
 /** Full bleed page hero with slow zoom and rising title */
-export function PageHero({ img, eyebrow, title, intro, children }: { img?: Img | null; eyebrow?: string; title: string; intro?: string; children?: React.ReactNode }) {
+export function PageHero({ img, eyebrow, title, intro, children, short = false }: { img?: Img | null; eyebrow?: string; title: string; intro?: string; children?: React.ReactNode; short?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     if (!ref.current || reduced()) return;
@@ -58,7 +58,7 @@ export function PageHero({ img, eyebrow, title, intro, children }: { img?: Img |
     return () => ctx.revert();
   }, [img?.lg]);
   return (
-    <section ref={ref} className="relative flex h-[88svh] min-h-[560px] items-end overflow-hidden bg-ink text-ivory" data-dark>
+    <section ref={ref} className={`relative flex ${short ? 'h-[68svh] min-h-[480px]' : 'h-[88svh] min-h-[560px]'} items-end overflow-hidden bg-ink text-ivory`} data-dark>
       <div className="ph-img absolute inset-0"><Picture img={img} eager /></div>
       <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/20 to-ink/30" />
       <div className="wrap relative pb-16 sm:pb-20">

@@ -195,7 +195,25 @@ async function batch2() {
   }
 }
 
-const BATCHES = { 'fb-2': batch2 };
+// Batch 3: different second image on the About page (only if still the original)
+async function batch3() {
+  const id = async (url) => (await one(`SELECT id FROM media WHERE url=$1 ORDER BY id LIMIT 1`, [url]))?.id ?? null;
+  const oldId = await id('/seed/mytop-06-2.webp');
+  const newId = await id('/seed/calacatta-paris-2.webp');
+  const about = (await one(`SELECT value FROM settings WHERE key='about'`))?.value;
+  if (about && newId && about.image_2 === oldId) {
+    await q(`UPDATE settings SET value = jsonb_set(value, '{image_2}', $1::jsonb) WHERE key='about'`, [JSON.stringify(newId)]);
+  }
+}
+
+// Batch 4: background image for the Contact page
+async function batch4() {
+  const img = (await one(`SELECT id FROM media WHERE url='/seed/ebur-vein-1.webp' ORDER BY id LIMIT 1`))?.id;
+  const site = (await one(`SELECT value FROM settings WHERE key='site'`))?.value;
+  if (img && site && !site.contact_image) await q(`UPDATE settings SET value = jsonb_set(value, '{contact_image}', $1::jsonb) WHERE key='site'`, [JSON.stringify(img)]);
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);

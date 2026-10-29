@@ -61,7 +61,7 @@ r.get('/site', async (_req, res) => {
   homeR.featured_products = fp.map((id) => prods.find((p) => p.id === id)).filter(Boolean);
   homeR.featured_collection = collections.find((c) => c.id === home.featured_collection) || collections[0] || null;
   res.set('Cache-Control', 'no-cache');
-  res.json({ site, home: homeR, about: await resolveSettingImages(about), seo, categories, collections, applications, brands });
+  res.json({ site: await resolveSettingImages(site), home: homeR, about: await resolveSettingImages(about), seo, categories, collections, applications, brands });
 });
 
 r.get('/entries/:type', async (req, res) => {

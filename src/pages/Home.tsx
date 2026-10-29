@@ -11,7 +11,7 @@ import type { Entry, Img } from '../lib/types';
 
 /* ---------------- 1. HERO ---------------- */
 function Hero({ h }: { h: any }) {
-  const { tr, t, lp } = useLang();
+  const { tr, lp, lang } = useLang();
   const { open } = useEnquiry();
   const ref = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
@@ -33,9 +33,9 @@ function Hero({ h }: { h: any }) {
         <div className="hero-img absolute inset-0"><Picture img={h.hero_image} eager /></div>
         <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-ink/40" />
       </div>
-      <div className="hero-content wrap relative flex h-full flex-col justify-end pb-16 sm:pb-24">
+      <div className="hero-content wrap relative flex h-full flex-col justify-end pb-16 pt-32 sm:pb-24">
         <div className="hero-fade eyebrow mb-7 text-sand">{tr(h, 'hero_kicker')}</div>
-        <RiseText as="h1" className="h-xl max-w-[12ch]" delay={1.1} trigger={false}>{tr(h, 'hero_title')}</RiseText>
+        <RiseText as="h1" className={`display max-w-[14ch] ${lang === 'el' ? 'text-[11vw] sm:text-[8vw] lg:text-[6.2vw]' : 'text-[13vw] sm:text-[10vw] lg:text-[8.2vw]'}`} delay={1.1} trigger={false}>{tr(h, 'hero_title')}</RiseText>
         <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
           <p className="hero-fade max-w-lg text-[15px] leading-[1.8] text-ivory/80">{tr(h, 'hero_sub')}</p>
           <div className="hero-fade flex flex-wrap gap-4">
@@ -43,9 +43,6 @@ function Hero({ h }: { h: any }) {
             <button onClick={() => { track('cta_click', 'hero_enquire'); open(); }} className="btn border-ivory bg-ivory text-charcoal" data-cursor="enquire"><span>{tr(h, 'cta_secondary')}</span></button>
           </div>
         </div>
-      </div>
-      <div className="hero-fade absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-[10px] uppercase tracking-wide3 text-ivory/60 sm:flex">
-        {t('scroll')}<span className="block h-10 w-px origin-top animate-pulse bg-ivory/50" />
       </div>
     </section>
   );
@@ -59,9 +56,10 @@ function Intro({ words, images }: { words: string[]; images: Img[] }) {
     if (!ref.current || r) return;
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ scrollTrigger: { trigger: ref.current, start: 'top top', end: '+=320%', scrub: 1, pin: true, anticipatePin: 1 } });
-      gsap.set('.iw-1, .iw-2', { yPercent: 110 });
-      tl.fromTo('.ii-0', { clipPath: 'inset(30% 34% 30% 34%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'power2.inOut' }, 0.15)
+      gsap.set('.iw', { yPercent: 110 });
+      tl.fromTo('.ii-0', { clipPath: 'inset(30% 34% 30% 34%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'power2.inOut' }, 0)
         .fromTo('.ii-0 img', { scale: 1.4 }, { scale: 1, duration: 1.2, ease: 'power2.inOut' }, '<')
+        .to('.iw-0', { yPercent: 0, duration: 0.5 }, '-=0.3')
         .to('.iw-0', { yPercent: -110, duration: 0.5 }, '+=0.2')
         .fromTo('.ii-1', { clipPath: 'inset(0% 0% 0% 100%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1, ease: 'power2.inOut' }, '<')
         .fromTo('.ii-1 img', { xPercent: 20, scale: 1.2 }, { xPercent: 0, scale: 1, duration: 1, ease: 'power2.inOut' }, '<')
@@ -86,13 +84,13 @@ function Intro({ words, images }: { words: string[]; images: Img[] }) {
       {images.slice(0, 3).map((img, i) => (
         <div key={img.id} className={`ii-${i} absolute inset-0 overflow-hidden`} style={{ clipPath: i === 0 ? undefined : 'inset(0 0 0 100%)' }}>
           <Picture img={img} sizes="100vw" />
-          <div className="absolute inset-0 bg-ink/35" />
+          <div className="absolute inset-0 bg-ink/45" />
         </div>
       ))}
-      <div className="iwords pointer-events-none absolute inset-0 flex items-center justify-center text-ivory mix-blend-difference">
+      <div className="iwords pointer-events-none absolute inset-0 flex items-center justify-center text-ivory [text-shadow:0_4px_40px_rgba(18,17,16,.35)]">
         {words.slice(0, 3).map((w, i) => (
           <div key={w} className="absolute overflow-hidden">
-            <div className={`iw iw-${i} display text-[19vw] sm:text-[15vw] lg:text-[12.5vw]`}>{w}</div>
+            <div className={`iw iw-${i} display whitespace-nowrap pb-[0.12em] ${w.length > 7 ? 'text-[13vw] sm:text-[11vw] lg:text-[9vw]' : 'text-[17vw] sm:text-[13vw] lg:text-[10.5vw]'}`}>{w}</div>
           </div>
         ))}
       </div>
@@ -124,9 +122,9 @@ function Materials({ cats }: { cats: Entry[] }) {
   return (
     <section ref={ref} className="relative overflow-hidden bg-marble lg:h-[100svh]">
       <div ref={track2} className="flex flex-col gap-16 py-24 lg:h-full lg:flex-row lg:items-center lg:gap-[6vw] lg:py-0 lg:pl-[8vw] lg:pr-[10vw]">
-        <div className="wrap shrink-0 lg:w-[30vw] lg:px-0">
+        <div className="wrap shrink-0 lg:w-[34vw] lg:px-0">
           <div className="eyebrow mb-6">{t('materials')}</div>
-          <RiseText as="h2" className="h-lg">{lang === 'el' ? 'Ένας κόσμος επιφανειών' : 'A world of surfaces'}</RiseText>
+          <RiseText as="h2" className="display text-5xl sm:text-6xl lg:text-[4.4vw]">{lang === 'el' ? 'Ένας κόσμος επιφανειών' : 'A world of surfaces'}</RiseText>
           <Link to={lp('/materials')} className="group ulink mt-10 inline-block text-[11px] font-medium uppercase tracking-wide3">{t('allMaterials')} <span className="arrow">→</span></Link>
         </div>
         {cats.map((c, i) => (
@@ -137,7 +135,7 @@ function Materials({ cats }: { cats: Entry[] }) {
             </div>
             <div className="pointer-events-none mt-5 flex items-baseline gap-5 lg:absolute lg:bottom-8 lg:left-8 lg:right-8 lg:mt-0 lg:text-ivory">
               <span className="text-xs tracking-wide2 text-bronze lg:text-ivory/70">0{i + 1}</span>
-              <span className="hp-name display block text-5xl uppercase leading-[0.9] sm:text-6xl lg:text-[4.6vw]">{tr(c, 'name')}</span>
+              <span className="hp-name display block text-5xl uppercase leading-[0.9] sm:text-6xl lg:text-[4vw]">{tr(c, 'name')}</span>
             </div>
             <span className="tile-hide absolute right-8 top-8 hidden text-[11px] uppercase tracking-wide3 text-ivory lg:block">{t('explore')} →</span>
           </Link>
@@ -192,7 +190,7 @@ function Collection({ c }: { c: Entry }) {
     const mm = gsap.matchMedia();
     mm.add('(min-width: 768px)', () => {
       const tl = gsap.timeline({ scrollTrigger: { trigger: ref.current, start: 'top top', end: '+=200%', scrub: 1, pin: true } });
-      tl.fromTo('.cx-frame', { width: '40vw', height: '62vh' }, { width: '100vw', height: '100vh', ease: 'power2.inOut', duration: 2 })
+      tl.fromTo('.cx-frame', { width: '46vw', height: '64vh' }, { width: '100vw', height: '100vh', ease: 'power2.inOut', duration: 2 })
         .fromTo('.cx-frame img', { scale: 1.3 }, { scale: 1, ease: 'power2.inOut', duration: 2 }, 0)
         .to('.cx-side', { opacity: 0, y: -30, duration: 0.6 }, 0.1)
         .fromTo('.cx-over', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8 }, 1.5)
@@ -202,14 +200,14 @@ function Collection({ c }: { c: Entry }) {
   }, [r]);
   return (
     <section ref={ref} className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-ivory py-24 md:h-[100svh] md:py-0">
-      <div className="cx-side wrap absolute inset-x-0 top-28 hidden justify-between md:flex">
-        <div className="eyebrow">{t('collection')}</div>
-        <div className="eyebrow">{tr(c, 'tagline')}</div>
+      <div className="cx-side absolute left-0 top-1/2 hidden w-[27vw] -translate-y-1/2 pl-[4vw] pr-[2vw] md:block">
+        <div className="eyebrow mb-6">{t('collection')}</div>
+        <div className="display text-[5.6vw] leading-[0.95]">{tr(c, 'name')}</div>
       </div>
-      <div className="cx-side absolute bottom-16 left-0 hidden w-[28vw] pl-[4vw] md:block">
-        <div className="display text-[7vw] leading-none">{tr(c, 'name')}</div>
+      <div className="cx-side absolute right-0 top-1/2 hidden w-[27vw] -translate-y-1/2 pl-[2vw] pr-[4vw] md:block">
+        <div className="eyebrow mb-6 leading-relaxed">{tr(c, 'tagline')}</div>
+        <p className="text-sm leading-[1.8] text-warm">{tr(c, 'desc')}</p>
       </div>
-      <div className="cx-side absolute bottom-16 right-0 hidden w-[26vw] pr-[4vw] text-sm leading-[1.8] text-warm md:block">{tr(c, 'desc')}</div>
       <div className="cx-frame relative h-[70vh] w-[90vw] overflow-hidden bg-ink text-ivory md:h-auto md:w-auto" data-dark>
         <Picture img={c.cover} />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />

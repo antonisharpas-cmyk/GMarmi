@@ -61,9 +61,9 @@ export function Contact() {
   const map = `https://www.google.com/maps?q=${encodeURIComponent(site.map_query || site.address_en)}&output=embed`;
   return (
     <>
-      <PageTitle eyebrow={t('contact')} title={lang === 'el' ? 'Ας μιλήσουμε για τον χώρο σας' : 'Let us talk about your space'} />
-      <section className="wrap grid gap-20 pb-28 lg:grid-cols-12">
-        <div className="space-y-10 lg:col-span-4">
+      <PageHero short img={site.contact_image || s.home.cta_image} eyebrow={t('contact')} title={lang === 'el' ? 'Ας μιλήσουμε για τον χώρο σας' : 'Let us talk about your space'} />
+      <section className="wrap grid gap-20 pb-28 pt-20 sm:pt-28 lg:grid-cols-12">
+        <div className="order-2 space-y-10 lg:order-1 lg:col-span-4">
           <div><div className="label">{t('address')}</div><p className="mt-2 leading-relaxed">{tr(site, 'address')}</p>
             <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.map_query || site.address_en)}`} target="_blank" rel="noreferrer" className="ulink mt-3 inline-block text-[11px] uppercase tracking-wide2 text-bronze">{t('directions')} →</a></div>
           <div><div className="label">{t('phone')}</div><a href={`tel:${site.phone_raw || site.phone}`} onClick={() => track('phone_click', 'contact')} className="mt-2 block font-display text-3xl">{site.phone}</a></div>
@@ -77,10 +77,10 @@ export function Contact() {
             </div>
           </div>
         </div>
-        <div className="lg:col-span-7 lg:col-start-6"><EnquiryForm /></div>
+        <div className="order-1 lg:order-2 lg:col-span-7 lg:col-start-6"><EnquiryForm /></div>
       </section>
       <section className="relative h-[60vh] min-h-[380px] bg-stone">
-        <iframe title="Map" src={map} className="h-full w-full grayscale-[60%] contrast-[1.05]" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+        <iframe title="Map" src={map} className="h-full w-full" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
       </section>
     </>
   );

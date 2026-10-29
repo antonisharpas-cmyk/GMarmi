@@ -7,6 +7,10 @@
   html.lenis, html.lenis body { height: auto; }
   .lenis.lenis-smooth { scroll-behavior: auto !important; }
   body { @apply bg-ivory text-charcoal font-sans; font-feature-settings: 'ss01'; }
+  /* Cormorant and Marcellus have no Greek letters, so Greek pages use Noto Serif Display for the whole
+     display text (Latin words included), keeping weight and colour consistent within a sentence. */
+  html[lang='el'] .font-display, html[lang='el'] .display, html[lang='el'] .caps, html[lang='el'] .font-caps { font-family: 'Noto Serif Display', Georgia, serif; }
+  html[lang='el'] .display { font-weight: 300; letter-spacing: -0.02em; }
   ::selection { background: #3A2D24; color: #F6F2EC; }
   :focus-visible { outline: 1px solid #9A7A55; outline-offset: 3px; }
   img { user-select: none; -webkit-user-drag: none; }

@@ -46,7 +46,8 @@ export default function Footer() {
           <div className="text-ivory/50">© {new Date().getFullYear()} {site.company || 'G. M. Andreou Marmi Ltd'}. {t('rights')}</div>
           <a href="https://www.ergonsite.com" target="_blank" rel="noreferrer" className="group flex flex-col items-center gap-1 text-ivory/50 hover:text-ivory">
             <span className="uppercase tracking-wide2">{t('developed')}</span>
-            <span className="font-sans text-base font-semibold tracking-tight text-ivory/90 group-hover:text-ivory">Ergon<span className="font-light">Site</span></span>
+            <img src="https://ergonsite.com/assets/logo.png" alt="ErgonSite" className="h-7 w-auto opacity-90 transition-opacity group-hover:opacity-100" loading="lazy" onError={(e) => { const i = e.currentTarget; i.style.display = 'none'; i.nextElementSibling?.classList.remove('hidden'); }} />
+            <span className="hidden font-sans text-base font-semibold tracking-tight text-ivory/90">ErgonSite</span>
           </a>
           <div className="flex flex-wrap gap-5 text-ivory/60 md:justify-end md:pr-16">
             <Link to={lp('/terms')} className="ulink hover:text-ivory">{t('terms')}</Link>
