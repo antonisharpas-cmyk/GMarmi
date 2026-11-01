@@ -157,7 +157,7 @@ export default function MediaLibrary() {
             <img src={sel.md} alt="" className="h-full max-h-[70vh] w-full object-contain bg-stone" />
             <div className="space-y-4 p-6">
               <div className="text-sm">{sel.filename}</div>
-              <Card title="Alt text (SEO and accessibility)">
+              <Card title="Image description">
                 <div className="space-y-3">
                   <Input defaultValue={sel.alt_en} placeholder="English" id="alt_en" />
                   <Input defaultValue={sel.alt_el} placeholder="Ελληνικά" id="alt_el" />

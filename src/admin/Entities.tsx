@@ -210,17 +210,7 @@ export function EntityEdit() {
               <Field label="URL slug" hint="Clean URL, letters, numbers and hyphens"><Input value={e.slug} onChange={(ev) => upd({ slug: ev.target.value })} /></Field>
             </div>
           </Card>
-          {type !== 'faq' && (
-            <Card title={`SEO · ${lang.toUpperCase()}`}>
-              <div className="space-y-4">
-                <Field label="SEO title" hint="Leave empty to use the name"><Input value={e.seo?.[`title_${lang}`] || ''} onChange={(ev) => upd({ seo: { ...e.seo, [`title_${lang}`]: ev.target.value } })} /></Field>
-                <Field label="SEO description"><Area rows={3} value={e.seo?.[`desc_${lang}`] || ''} onChange={(ev) => upd({ seo: { ...e.seo, [`desc_${lang}`]: ev.target.value } })} /></Field>
-                <Field label="Social share image" hint="Defaults to the cover image">
-                  <SingleImage value={e.seo?.og_image ? { id: 0, lg: e.seo.og_image, md: e.seo.og_image, sm: e.seo.og_image } : null} onChange={(img) => upd({ seo: { ...e.seo, og_image: img?.lg || '' } })} />
-                </Field>
-              </div>
-            </Card>
-          )}
+          {/* SEO (title, description, share image) is filled in automatically from the name, text and cover image */}
           <Card title="Danger zone">
             <Btn kind="danger" onClick={async () => { if (!confirm('Delete permanently?')) return; await api(`/api/admin/entries/${type}/${e.id}`, { method: 'DELETE' }); nav(`/admin/content/${type}`); }}>Delete {cfg.label.toLowerCase()}</Btn>
           </Card>

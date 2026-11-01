@@ -36,7 +36,6 @@ const TABS: Record<string, { title: string; key: string; groups: G[] }> = {
     { title: 'Cookie Policy', fields: [{ k: 'cookies', label: 'Text', t: 'area', bi: true, rows: 8 }] },
     { title: 'Terms & Conditions', fields: [{ k: 'terms', label: 'Text', t: 'area', bi: true, rows: 10 }] },
   ] },
-  seo: { title: 'Default SEO', key: 'seo', groups: [{ title: 'Homepage and defaults', fields: [{ k: 'title', label: 'Title', t: 'text', bi: true }, { k: 'desc', label: 'Description', t: 'area', bi: true }] }] },
 };
 const SECTION_NAMES: Record<string, string> = { hero: 'Hero', intro: 'Stone. Surface. Space.', materials: 'Materials (horizontal)', story: 'Material story', collection: 'Featured collection', applications: 'Applications', showcase: 'Featured materials', projects: 'Projects (when added)', why: 'Why GM Andreou Marmi', cta: 'Final call to action' };
 
