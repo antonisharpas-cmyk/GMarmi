@@ -27,6 +27,8 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [sub, setSub] = useState(false); // Inspiration list in the mobile menu
+  const [drop, setDrop] = useState(false); // Inspiration dropdown on desktop
 
   useEffect(() => {
     let last = window.scrollY;
@@ -41,7 +43,8 @@ export default function Header() {
     window.addEventListener('scroll', on, { passive: true });
     return () => window.removeEventListener('scroll', on);
   }, []);
-  useEffect(() => { setMenu(false); }, [pathname]);
+  useEffect(() => { setMenu(false); setDrop(false); }, [pathname]);
+  useEffect(() => { if (!menu) setSub(false); }, [menu]);
   // clicking the page you are already on closes the menu and takes you back to the top
   const same = (to: string) => () => {
     if (to !== pathname) return;
@@ -51,10 +54,13 @@ export default function Header() {
   useEffect(() => { scrollLock(menu); }, [menu]);
 
   const light = overlay && !scrolled && !menu;
-  const nav = [
-    ['/', t('home')], ['/materials', t('materials')], ['/collections', t('collections')], ['/applications', t('applications')],
-    ['/projects', t('projects')], ['/about', t('about')], ['/contact', t('contact')],
-  ] as const;
+  // Applications and Projects are grouped under one "Inspiration" dropdown
+  const inspo = [['/applications', t('applications')], ['/projects', t('projects')]] as const;
+  const nav: (readonly [string, string] | 'inspo')[] = [
+    ['/', t('home')], ['/materials', t('materials')], ['/collections', t('collections')], 'inspo',
+    ['/about', t('about')], ['/contact', t('contact')],
+  ];
+  const inspoActive = inspo.some(([p]) => base === p || base.startsWith(p + '/'));
 
   return (
     <>
@@ -67,9 +73,26 @@ export default function Header() {
             <img src={light ? '/brand/logo-light.png' : '/brand/logo-dark.png'} alt="G. M. Andreou Marmi Ltd" className="w-full" />
           </Link>
           <nav className="hidden items-center gap-6 xl:flex 2xl:gap-8">
-            {nav.map(([p, l]) => (
-              <NavLink key={p} to={lp(p)} onClick={same(lp(p))} end={p === '/'} className={({ isActive }) => `ulink text-[11px] font-medium uppercase tracking-wide2 ${isActive ? 'active' : ''}`}>
-                {l}
+            {nav.map((item) => item === 'inspo' ? (
+              <div key="inspo" className="relative" onMouseEnter={() => setDrop(true)} onMouseLeave={() => setDrop(false)}>
+                <button type="button" onClick={() => setDrop((d) => !d)} aria-expanded={drop} aria-haspopup="true"
+                  className={`ulink flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide2 ${inspoActive ? 'active' : ''}`}>
+                  {t('inspiration')}
+                  <svg className={`h-2.5 w-2.5 transition-transform duration-300 ${drop ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="M2 4l4 4 4-4" /></svg>
+                </button>
+                <div className={`absolute left-1/2 top-full -translate-x-1/2 pt-5 transition-all duration-300 ${drop ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-1 opacity-0'}`}>
+                  <div className="min-w-[200px] border border-charcoal/10 bg-ivory py-2 text-charcoal shadow-[0_20px_50px_rgba(29,27,25,.12)]">
+                    {inspo.map(([p, l]) => (
+                      <NavLink key={p} to={lp(p)} onClick={same(lp(p))} className={({ isActive }) => `block px-6 py-3 text-[11px] font-medium uppercase tracking-wide2 transition-colors hover:bg-stone/60 ${isActive ? 'text-bronze' : ''}`}>
+                        {l}
+                      </NavLink>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <NavLink key={item[0]} to={lp(item[0])} onClick={same(lp(item[0]))} end={item[0] === '/'} className={({ isActive }) => `ulink text-[11px] font-medium uppercase tracking-wide2 ${isActive ? 'active' : ''}`}>
+                {item[1]}
               </NavLink>
             ))}
           </nav>
@@ -96,11 +119,31 @@ export default function Header() {
       <div className={`fixed inset-0 z-40 bg-ivory transition-[clip-path] duration-[900ms] ease-lux xl:hidden ${menu ? '[clip-path:inset(0_0_0_0)]' : '[clip-path:inset(0_0_100%_0)] pointer-events-none'}`}>
         <div className="wrap flex h-full flex-col justify-between pb-10 pt-28">
           <nav className="flex flex-col gap-1">
-            {nav.map(([p, l], i) => (
-              <Link key={p} to={lp(p)} onClick={same(lp(p))} className="display text-[11vw] leading-[1.1] sm:text-6xl" style={{ transition: `opacity .6s ${0.15 + i * 0.05}s, transform .9s cubic-bezier(.22,.8,.2,1) ${0.15 + i * 0.05}s`, opacity: menu ? 1 : 0, transform: menu ? 'none' : 'translateY(30px)' }}>
-                {l}
-              </Link>
-            ))}
+            {nav.map((item, i) => {
+              const anim = { transition: `opacity .6s ${0.15 + i * 0.05}s, transform .9s cubic-bezier(.22,.8,.2,1) ${0.15 + i * 0.05}s`, opacity: menu ? 1 : 0, transform: menu ? 'none' : 'translateY(30px)' };
+              if (item === 'inspo') return (
+                <div key="inspo" style={anim}>
+                  <button type="button" onClick={() => setSub((s) => !s)} aria-expanded={sub} className="display flex items-center gap-4 text-[11vw] leading-[1.1] sm:text-6xl">
+                    {t('inspiration')}
+                    <svg className={`h-5 w-5 transition-transform duration-500 ${sub ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1"><path d="M2 4l4 4 4-4" /></svg>
+                  </button>
+                  <div className={`grid transition-all duration-500 ease-lux ${sub ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                    <div className="overflow-hidden">
+                      <div className="flex flex-col gap-1 border-l border-charcoal/15 py-2 pl-5">
+                        {inspo.map(([p, l]) => (
+                          <Link key={p} to={lp(p)} onClick={same(lp(p))} className="display text-[7vw] leading-[1.2] text-warm sm:text-4xl">{l}</Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+              return (
+                <Link key={item[0]} to={lp(item[0])} onClick={same(lp(item[0]))} className="display text-[11vw] leading-[1.1] sm:text-6xl" style={anim}>
+                  {item[1]}
+                </Link>
+              );
+            })}
           </nav>
           <div className="space-y-6">
             <button onClick={() => { setMenu(false); openEnquiry(); }} className="btn btn-dark w-full justify-center"><span>{t('enquire')}</span></button>
