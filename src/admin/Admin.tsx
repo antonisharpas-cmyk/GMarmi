@@ -53,9 +53,7 @@ function Dashboard() {
             </Link>
           )) : <p className="text-sm text-taupe">No enquiries yet.</p>}
         </Card>
-        <Card title="Enquiries by status">
-          {d.byStatus.length ? d.byStatus.map((s: any) => <div key={s.status} className="flex justify-between py-1.5 text-sm"><Badge tone={s.status}>{s.status.replace('_', ' ')}</Badge>{s.n}</div>) : <p className="text-sm text-taupe">Nothing yet.</p>}
-          <div className="mt-6 text-[10px] uppercase tracking-wide2 text-warm">Last 30 days</div>
+        <Card title="Last 30 days">
           {[['Page views', 'page_view'], ['Material views', 'product_view'], ['Enquiries sent', 'enquiry_submit'], ['Quote requests', 'quote_request'], ['Phone clicks', 'phone_click'], ['Chats started', 'chat_start']].map(([l, k]) => (
             <div key={k} className="flex justify-between py-1 text-sm"><span className="text-warm">{l}</span>{ev[k] || 0}</div>
           ))}
