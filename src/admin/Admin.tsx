@@ -123,6 +123,8 @@ function Shell() {
   const { data: d } = useLoad<any>('/api/admin/dashboard', [pathname]);
   useEffect(() => setOpen(false), [pathname]);
   const p = me?.perms || [];
+  // staff accounts (enquiries and chat only) do not see the dashboard
+  const full = p.some((x) => ['content', 'media', 'settings', 'users'].includes(x));
   const link = (to: string, label: string, n?: number) => (
     <NavLink key={to} to={to} end={to === '/admin'} className={({ isActive }) => `flex items-center justify-between px-5 py-2 text-sm ${isActive ? 'bg-ivory/10 text-ivory' : 'text-ivory/60 hover:text-ivory'}`}>
       {label}{n ? <span className="rounded-full bg-bronze px-1.5 text-[10px] text-white">{n}</span> : null}
@@ -132,13 +134,16 @@ function Shell() {
     <div className="min-h-screen bg-[#f3efe9] font-sans text-charcoal lg:pl-60">
       <aside className={`fixed inset-y-0 left-0 z-40 w-60 overflow-y-auto bg-ink py-6 transition-transform lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
         <Link to="/admin" className="mb-8 block px-5"><img src="/brand/logo-light.png" alt="GM Andreou Marmi" className="w-32" /></Link>
-        {link('/admin', 'Dashboard')}
+        {full && link('/admin', 'Dashboard')}
         {p.includes('enquiries') && link('/admin/enquiries', 'Enquiries', d?.enquiries?.unread)}
         {p.includes('chat') && link('/admin/chat', 'Live chat', d?.chats?.unread)}
         {p.includes('content') && (
           <>
             <div className="mt-6 px-5 pb-2 text-[10px] uppercase tracking-wide2 text-ivory/35">Catalogue</div>
-            {['product', 'category', 'collection', 'brand', 'application', 'project', 'faq'].map((t) => link(`/admin/content/${t}`, TYPES[t].plural))}
+            {['product', 'category', 'collection', 'brand', 'faq'].map((t) => link(`/admin/content/${t}`, TYPES[t].plural))}
+            {/* same grouping as the website menu: Applications and Projects live under Inspiration */}
+            <div className="mt-6 px-5 pb-2 text-[10px] uppercase tracking-wide2 text-ivory/35">Inspiration</div>
+            {['application', 'project'].map((t) => link(`/admin/content/${t}`, TYPES[t].plural))}
           </>
         )}
         {(p.includes('media') || p.includes('settings')) && <div className="mt-6 px-5 pb-2 text-[10px] uppercase tracking-wide2 text-ivory/35">Website</div>}
@@ -156,7 +161,7 @@ function Shell() {
       </div>
       <main className="mx-auto max-w-[1400px] p-5 sm:p-8 lg:p-10">
         <Routes>
-          <Route index element={<Dashboard />} />
+          <Route index element={full ? <Dashboard /> : <Navigate to={p.includes('enquiries') ? '/admin/enquiries' : '/admin/account'} replace />} />
           <Route path="enquiries" element={<Enquiries />} />
           <Route path="enquiries/:id" element={<EnquiryDetail />} />
           <Route path="chat" element={<Chats />} />

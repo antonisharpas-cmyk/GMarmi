@@ -213,7 +213,17 @@ async function batch4() {
   if (img && site && !site.contact_image) await q(`UPDATE settings SET value = jsonb_set(value, '{contact_image}', $1::jsonb) WHERE key='site'`, [JSON.stringify(img)]);
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4 };
+// Batch 5: a staff account that only sees Enquiries, Live chat and My account
+async function batch5() {
+  const email = (process.env.STAFF_EMAIL || 'staff@gmmarmi.local').toLowerCase();
+  if (await one(`SELECT id FROM users WHERE email=$1`, [email])) return;
+  const bcrypt = (await import('bcryptjs')).default;
+  const pw = process.env.STAFF_PASSWORD || 'GmStaff2026!';
+  await q(`INSERT INTO users (email, name, role, password_hash) VALUES ($1,'Staff','staff',$2)`, [email, await bcrypt.hash(pw, 11)]);
+  console.log(`[seed] Staff account created: ${email} (change the password after first login)`);
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);
