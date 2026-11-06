@@ -54,7 +54,7 @@ async function batch2() {
   // Fondovalle description from the "Η κορυφαία ιταλική αισθητική" post (only if still the seeded text)
   const fb = await one(`SELECT data FROM entries WHERE id=$1`, [fondovalle]);
   if (fb && fb.data.desc_en === 'Maker of MY TOP ceramic surfaces.') {
-    await q(`UPDATE entries SET data = data || $2::jsonb WHERE id=$1`, [fondovalle, JSON.stringify({
+    await q(`UPDATE entries SET data = json_patch(data, $2) WHERE id=$1`, [fondovalle, JSON.stringify({
       desc_en: 'Italian design by Fondovalle, maker of MY TOP. Large format slabs for kitchens, bathrooms, floors and walls: scratch resistant, resistant to heat and stains, ideal for modern and luxury interiors.',
       desc_el: 'Αυθεντικός ιταλικός σχεδιασμός από τη Fondovalle, δημιουργό των MY TOP. Πλάκες μεγάλων διαστάσεων για κουζίνες, μπάνια, δάπεδα και τοίχους, αντιχαρακτικές, ανθεκτικές στη θερμότητα και τους λεκέδες, ιδανικές για μοντέρνες και πολυτελείς εφαρμογές.',
     })]);
@@ -181,7 +181,7 @@ async function batch2() {
   const prods = await q(`SELECT id, data FROM entries WHERE type='product'`);
   for (const appId of Object.values(A).filter(Boolean)) {
     const ids = prods.filter((p) => (p.data.application_ids || []).includes(appId)).map((p) => p.id);
-    await q(`UPDATE entries SET data = jsonb_set(data, '{product_ids}', $1::jsonb) WHERE id=$2`, [JSON.stringify(ids), appId]);
+    await q(`UPDATE entries SET data = json_set(data, '$.product_ids', json($1)) WHERE id=$2`, [JSON.stringify(ids), appId]);
   }
 
   // Homepage featured materials, only if still the original default
@@ -190,7 +190,7 @@ async function batch2() {
     const orig = await Promise.all(['fantasy-dark', 'travertino-ebur', 'magnus', 'mytop-ref-06', 'mytop-ref-04', 'mytop-ref-08'].map((s) => idOf('product', s)));
     if (JSON.stringify(home.featured_products) === JSON.stringify(orig)) {
       const next = await Promise.all(['fantasy-dark', 'calacatta-paris', 'tiger', 'labradorite-royale', 'travertino-ebur', 'magnus'].map((s) => idOf('product', s)));
-      await q(`UPDATE settings SET value = jsonb_set(value, '{featured_products}', $1::jsonb) WHERE key='home'`, [JSON.stringify(next.filter(Boolean))]);
+      await q(`UPDATE settings SET value = json_set(value, '$.featured_products', json($1)) WHERE key='home'`, [JSON.stringify(next.filter(Boolean))]);
     }
   }
 }
@@ -202,7 +202,7 @@ async function batch3() {
   const newId = await id('/seed/calacatta-paris-2.webp');
   const about = (await one(`SELECT value FROM settings WHERE key='about'`))?.value;
   if (about && newId && about.image_2 === oldId) {
-    await q(`UPDATE settings SET value = jsonb_set(value, '{image_2}', $1::jsonb) WHERE key='about'`, [JSON.stringify(newId)]);
+    await q(`UPDATE settings SET value = json_set(value, '$.image_2', json($1)) WHERE key='about'`, [JSON.stringify(newId)]);
   }
 }
 
@@ -210,7 +210,7 @@ async function batch3() {
 async function batch4() {
   const img = (await one(`SELECT id FROM media WHERE url='/seed/ebur-vein-1.webp' ORDER BY id LIMIT 1`))?.id;
   const site = (await one(`SELECT value FROM settings WHERE key='site'`))?.value;
-  if (img && site && !site.contact_image) await q(`UPDATE settings SET value = jsonb_set(value, '{contact_image}', $1::jsonb) WHERE key='site'`, [JSON.stringify(img)]);
+  if (img && site && !site.contact_image) await q(`UPDATE settings SET value = json_set(value, '$.contact_image', json($1)) WHERE key='site'`, [JSON.stringify(img)]);
 }
 
 // Batch 5: a staff account that only sees Enquiries, Live chat and My account

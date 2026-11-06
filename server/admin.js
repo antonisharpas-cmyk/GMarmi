@@ -49,7 +49,7 @@ r.get('/dashboard', async (req, res) => {
     q(`SELECT id, ref, name, enquiry_type, product_name, status, is_read, created_at FROM enquiries WHERE NOT archived ORDER BY id DESC LIMIT 8`),
     one(`SELECT COUNT(*) FILTER (WHERE status<>'closed')::int open, COALESCE(SUM(unread_admin),0)::int unread FROM chat_conversations`),
     q(`SELECT a.action, a.detail, a.created_at, u.name FROM activity a LEFT JOIN users u ON u.id=a.user_id ORDER BY a.id DESC LIMIT 12`),
-    q(`SELECT name, COUNT(*)::int n FROM analytics_events WHERE created_at > NOW() - INTERVAL '30 days' GROUP BY name`),
+    q(`SELECT name, COUNT(*)::int n FROM analytics_events WHERE created_at > strftime('%Y-%m-%dT%H:%M:%fZ','now','-30 days') GROUP BY name`),
   ]);
   const e = await one(`SELECT COUNT(*) FILTER (WHERE status='new')::int new, COUNT(*) FILTER (WHERE NOT is_read)::int unread FROM enquiries WHERE NOT archived`);
   res.json({ counts: Object.fromEntries(counts.map((c) => [c.type, c.n])), byStatus, recent, chats, enquiries: e, activity, events });
@@ -166,7 +166,7 @@ r.post('/media/:id/replace', can('media'), withUpload(imgUpload.single('file')),
 r.delete('/media/:id', can('media'), async (req, res) => {
   const id = Number(req.params.id);
   // remove from every entry gallery
-  const rows = await q(`SELECT id, images, cover_id FROM entries WHERE images @> $1::jsonb OR cover_id=$2`, [JSON.stringify([id]), id]);
+  const rows = await q(`SELECT id, images, cover_id FROM entries WHERE EXISTS (SELECT 1 FROM json_each(entries.images) WHERE value=$1) OR cover_id=$2`, [id, id]);
   for (const e of rows) {
     const imgs = e.images.filter((x) => x !== id);
     await q(`UPDATE entries SET images=$2, cover_id=$3 WHERE id=$1`, [e.id, JSON.stringify(imgs), e.cover_id === id ? imgs[0] ?? null : e.cover_id]);

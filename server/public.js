@@ -57,7 +57,7 @@ r.get('/site', async (_req, res) => {
   const homeR = await resolveSettingImages(home);
   // featured products / collection resolved
   const fp = (home.featured_products || []);
-  const prods = fp.length ? await hydrate(await q(`SELECT * FROM entries WHERE id = ANY($1::int[]) AND published`, [fp])) : [];
+  const prods = fp.length ? await hydrate(await q(`SELECT * FROM entries WHERE id IN (SELECT value FROM json_each($1)) AND published`, [fp])) : [];
   homeR.featured_products = fp.map((id) => prods.find((p) => p.id === id)).filter(Boolean);
   homeR.featured_collection = collections.find((c) => c.id === home.featured_collection) || collections[0] || null;
   res.set('Cache-Control', 'no-cache');

@@ -39,6 +39,6 @@ export function mediaUrls(m) {
 export async function mediaMap(ids) {
   const uniq = [...new Set(ids.filter((x) => Number.isInteger(x)))];
   if (!uniq.length) return {};
-  const rows = await q(`SELECT id, url, url_sm, alt_en, alt_el, width, height, bytes FROM media WHERE id = ANY($1::int[])`, [uniq]);
+  const rows = await q(`SELECT id, url, url_sm, alt_en, alt_el, width, height, bytes FROM media WHERE id IN (SELECT value FROM json_each($1))`, [uniq]);
   return Object.fromEntries(rows.map((r) => [r.id, mediaUrls(r)]));
 }

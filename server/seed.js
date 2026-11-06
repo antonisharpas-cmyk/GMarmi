@@ -215,7 +215,7 @@ export async function seedIfEmpty() {
   const prods = await q(`SELECT id, data FROM entries WHERE type='product'`);
   for (const [slug, appId] of Object.entries(app)) {
     const ids = prods.filter((p) => (p.data.application_ids || []).includes(appId)).map((p) => p.id);
-    await q(`UPDATE entries SET data = jsonb_set(data, '{product_ids}', $1::jsonb) WHERE id=$2`, [JSON.stringify(ids), appId]);
+    await q(`UPDATE entries SET data = json_set(data, '$.product_ids', json($1)) WHERE id=$2`, [JSON.stringify(ids), appId]);
   }
 
   // ---------- FAQs ----------
