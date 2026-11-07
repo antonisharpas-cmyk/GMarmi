@@ -423,7 +423,37 @@ async function batch9() {
   }
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9 };
+async function batch10() {
+  const cat = await idOf('category', 'rak-ceramics');
+  const brand = await idOf('brand', 'rak-ceramics');
+  const kitchens = await idOf('application', 'kitchens');
+  const islands = await idOf('application', 'countertops-islands');
+  const list = [
+    ['carrara-hyper-white', 'Carrara Hyper White', '144 x 305 cm', 'Polished', 'Γυαλιστερό',
+      'Bright white Carrara look with soft grey veins, for clean and luminous kitchens.', 'Φωτεινό λευκό Carrara με απαλά γκρι νερά, για καθαρές και φωτεινές κουζίνες.', 'White & Grey', 'Λευκό & Γκρι', -3],
+    ['moon-stone', 'Moon Stone', '120 x 280 cm, 162 x 324 cm', 'Matt', 'Ματ',
+      'A light grey stone and cement look with fine flakes, calm and natural on islands and worktops.', 'Ανοιχτό γκρι όψη πέτρας και τσιμέντου με λεπτούς κόκκους, ήρεμη και φυσική σε νησίδες και πάγκους.', 'Light Grey', 'Ανοιχτό Γκρι', -2],
+    ['black-beauty', 'Black Beauty', '144 x 305 cm', 'Polished', 'Γυαλιστερό',
+      'Deep black marble look with golden and white veins, for bold statement kitchens.', 'Βαθύ μαύρο μάρμαρο με χρυσαφένια και λευκά νερά, για κουζίνες με έντονο χαρακτήρα.', 'Black & Gold', 'Μαύρο & Χρυσό', -1],
+  ];
+  for (const [base, name, dims, fen, fel, den, del, cen, cel, sort] of list) {
+    const slug = `rak-${base}`;
+    if (await idOf('product', slug)) continue;
+    const amb = await media(`${slug}-kitchen`, `${name} kitchen by RAK Ceramics Maximus`);
+    const sw = await media(`${slug}-swatch`, `${name} slab`);
+    const data = {
+      name_en: name, name_el: name, category_id: cat, collection_id: null, brand_id: brand,
+      tagline_en: den, tagline_el: del, desc_en: `${den} Maximus slabs by RAK Ceramics.`, desc_el: `${del} Πλάκες Maximus της RAK Ceramics.`,
+      features_en: [], features_el: [], specs_extra: [],
+      specs: { material_en: 'Porcelain', material_el: 'Πορσελάνη', finish_en: fen, finish_el: fel, dimensions: dims, colour_en: cen, colour_el: cel },
+      application_ids: [kitchens, islands].filter(Boolean),
+    };
+    await q(`INSERT INTO entries (type, slug, sort_order, data, images, cover_id, published) VALUES ('product',$1,$2,$3,$4,$5,TRUE)`,
+      [slug, sort, JSON.stringify(data), JSON.stringify([amb, sw]), amb]);
+  }
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);
