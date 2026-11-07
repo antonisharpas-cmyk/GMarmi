@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS media (
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 
--- Content entries: category, brand, collection, application, product, project, faq
+-- Content entries: category, brand, application, product, faq
 CREATE TABLE IF NOT EXISTS entries (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   type TEXT NOT NULL,

@@ -7,7 +7,7 @@ import { mediaMap } from './media.js';
 import { sendMail, customerConfirmation, adminNotification } from './mail.js';
 
 const r = express.Router();
-const TYPES = ['category', 'brand', 'collection', 'application', 'product', 'project', 'faq'];
+const TYPES = ['category', 'brand', 'application', 'product', 'faq'];
 
 export async function getSetting(key) {
   const row = await one('SELECT value FROM settings WHERE key=$1', [key]);
@@ -50,18 +50,17 @@ async function resolveSettingImages(obj) {
 }
 
 r.get('/site', async (_req, res) => {
-  const [site, home, about, seo, categories, collections, applications, brands] = await Promise.all([
+  const [site, home, about, seo, categories, applications, brands] = await Promise.all([
     getSetting('site'), getSetting('home'), getSetting('about'), getSetting('seo'),
-    listType('category'), listType('collection'), listType('application'), listType('brand'),
+    listType('category'), listType('application'), listType('brand'),
   ]);
   const homeR = await resolveSettingImages(home);
-  // featured products / collection resolved
+  // featured products resolved
   const fp = (home.featured_products || []);
   const prods = fp.length ? await hydrate(await q(`SELECT * FROM entries WHERE id IN (SELECT value FROM json_each($1)) AND published`, [fp])) : [];
   homeR.featured_products = fp.map((id) => prods.find((p) => p.id === id)).filter(Boolean);
-  homeR.featured_collection = collections.find((c) => c.id === home.featured_collection) || collections[0] || null;
   res.set('Cache-Control', 'no-cache');
-  res.json({ site: await resolveSettingImages(site), home: homeR, about: await resolveSettingImages(about), seo, categories, collections, applications, brands });
+  res.json({ site: await resolveSettingImages(site), home: homeR, about: await resolveSettingImages(about), seo, categories, applications, brands });
 });
 
 r.get('/entries/:type', async (req, res) => {
@@ -78,21 +77,13 @@ r.get('/entries/:type/:slug', async (req, res) => {
   const products = await listType('product');
   const related = {};
   if (type === 'product') {
-    const [cats, cols, brands, apps, projects] = await Promise.all([listType('category'), listType('collection'), listType('brand'), listType('application'), listType('project')]);
+    const [cats, brands, apps] = await Promise.all([listType('category'), listType('brand'), listType('application')]);
     related.category = cats.find((c) => c.id === item.category_id) || null;
-    related.collection = cols.find((c) => c.id === item.collection_id) || null;
     related.brand = brands.find((c) => c.id === item.brand_id) || null;
     related.applications = apps.filter((a) => (item.application_ids || []).includes(a.id));
-    related.projects = projects.filter((p) => (p.product_ids || []).includes(item.id));
-    related.products = products.filter((p) => p.id !== item.id && (p.collection_id === item.collection_id || p.category_id === item.category_id)).slice(0, 6);
+    related.products = products.filter((p) => p.id !== item.id && p.category_id === item.category_id).slice(0, 6);
   }
   if (type === 'category') related.products = products.filter((p) => p.category_id === item.id);
-  if (type === 'collection') {
-    related.products = products.filter((p) => p.collection_id === item.id);
-    related.brand = (await listType('brand')).find((b) => b.id === item.brand_id) || null;
-    related.applications = (await listType('application')).filter((a) => (item.application_ids || []).includes(a.id));
-    related.projects = (await listType('project')).filter((p) => (p.collection_ids || []).includes(item.id));
-  }
   if (type === 'brand') related.products = products.filter((p) => p.brand_id === item.id);
   if (type === 'application') {
     const cats = await listType('category');
@@ -105,11 +96,6 @@ r.get('/entries/:type/:slug', async (req, res) => {
       return { ...c, colours: list.map((p) => ({ id: p.id, slug: p.slug, name_en: p.name_en, name_el: p.name_el, cover: p.cover })) };
     });
     related.products = products.filter((p) => (item.product_ids || []).includes(p.id) || (p.application_ids || []).includes(item.id));
-    related.projects = (await listType('project')).filter((p) => (p.application_ids || []).includes(item.id));
-  }
-  if (type === 'project') {
-    related.products = products.filter((p) => (item.product_ids || []).includes(p.id));
-    related.collections = (await listType('collection')).filter((c) => (item.collection_ids || []).includes(c.id));
   }
   res.json({ item, related });
 });

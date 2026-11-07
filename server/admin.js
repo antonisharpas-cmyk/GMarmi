@@ -9,7 +9,7 @@ import { hydrate } from './public.js';
 import { sendMail } from './mail.js';
 
 const r = express.Router();
-const TYPES = ['category', 'brand', 'collection', 'application', 'product', 'project', 'faq'];
+const TYPES = ['category', 'brand', 'application', 'product', 'faq'];
 const imgUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 25 * 1024 * 1024, files: 30 },

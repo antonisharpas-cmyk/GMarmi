@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { LangProvider, savedLang } from './lib/i18n';
+import { LangProvider, savedLang, useLang } from './lib/i18n';
 import { SiteProvider } from './lib/site';
 import { ScrollTrigger, scrollTop, startSmoothScroll, stopSmoothScroll } from './lib/motion';
 import { track } from './lib/api';
@@ -18,6 +18,11 @@ import { About, Contact, Faq, Group, Legal, LinkPage } from './pages/Info';
 
 const Admin = lazy(() => import('./admin/Admin'));
 
+function Go({ to }: { to: string }) {
+  const { lp } = useLang();
+  return <Navigate to={lp(to)} replace />;
+}
+
 function PublicRoutes() {
   return (
     <Routes>
@@ -25,12 +30,11 @@ function PublicRoutes() {
       <Route path="materials" element={<Materials />} />
       <Route path="materials/:cat" element={<Materials />} />
       <Route path="materials/:cat/:slug" element={<Product />} />
-      <Route path="collections" element={<ListPage kind="collection" />} />
-      <Route path="collections/:slug" element={<DetailPage kind="collection" />} />
-      <Route path="applications" element={<ListPage kind="application" />} />
-      <Route path="applications/:slug" element={<DetailPage kind="application" />} />
-      <Route path="projects" element={<ListPage kind="project" />} />
-      <Route path="projects/:slug" element={<DetailPage kind="project" />} />
+      {/* Collections and Projects were removed, old links go to Materials and Applications */}
+      <Route path="collections/*" element={<Go to="/materials" />} />
+      <Route path="applications" element={<ListPage />} />
+      <Route path="applications/:slug" element={<DetailPage />} />
+      <Route path="projects/*" element={<Go to="/applications" />} />
       <Route path="about" element={<About />} />
       <Route path="group" element={<Group />} />
       <Route path="contact" element={<Contact />} />

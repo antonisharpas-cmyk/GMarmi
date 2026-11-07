@@ -19,7 +19,6 @@ export type SiteData = {
   about: Record<string, any>;
   seo: Record<string, any>;
   categories: Entry[];
-  collections: Entry[];
   applications: Entry[];
   brands: Entry[];
 };

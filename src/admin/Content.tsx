@@ -15,10 +15,8 @@ const TABS: Record<string, { title: string; key: string; groups: G[] }> = {
     { section: 'intro', title: 'Stone. Surface. Space.', fields: [{ k: 'intro_words', label: 'Three words (one per line)', t: 'lines', bi: true }, { k: 'intro_images', label: 'Three images, in order', t: 'imgs' }] },
     { section: 'materials', title: 'Materials (horizontal)', fields: [], note: { text: 'Shows the published material categories, in the order set under Categories.', to: '/admin/content/category', label: 'Edit categories' } },
     { section: 'story', title: 'Material story', fields: [{ k: 'story_image', label: 'Image', t: 'img' }, { k: 'story_lines', label: 'Lines (first is small, last is the link)', t: 'lines', bi: true }] },
-    { section: 'collection', title: 'Featured collection', fields: [{ k: 'featured_collection', label: 'Featured collection', t: 'rel', rel: 'collection' }] },
     { section: 'applications', title: 'Applications', fields: [], note: { text: 'Shows the first six published applications, in the order set under Applications.', to: '/admin/content/application', label: 'Edit applications' } },
     { section: 'showcase', title: 'Featured materials', fields: [{ k: 'featured_products', label: 'Featured materials (in this order)', t: 'multi', rel: 'product' }] },
-    { section: 'projects', title: 'Projects', fields: [], note: { text: 'Shows the first four published projects. The section stays hidden on the website until a project is added.', to: '/admin/content/project', label: 'Edit projects' } },
     { section: 'why', title: 'Why GM Andreou Marmi', fields: [{ k: 'why', label: '', t: 'why' }] },
     { section: 'cta', title: 'Final call to action', fields: [{ k: 'cta_title', label: 'Title', t: 'text', bi: true }, { k: 'cta_button', label: 'Button', t: 'text', bi: true }, { k: 'cta_image', label: 'Background image', t: 'img' }] },
   ] },
@@ -39,7 +37,7 @@ const TABS: Record<string, { title: string; key: string; groups: G[] }> = {
     { title: 'Terms & Conditions', fields: [{ k: 'terms', label: 'Text', t: 'area', bi: true, rows: 10 }] },
   ] },
 };
-const SECTION_NAMES: Record<string, string> = { hero: 'Hero', intro: 'Stone. Surface. Space.', materials: 'Materials (horizontal)', story: 'Material story', collection: 'Featured collection', applications: 'Applications', showcase: 'Featured materials', projects: 'Projects (when added)', why: 'Why GM Andreou Marmi', cta: 'Final call to action' };
+const SECTION_NAMES: Record<string, string> = { hero: 'Hero', intro: 'Stone. Surface. Space.', materials: 'Materials (horizontal)', story: 'Material story', applications: 'Applications', showcase: 'Featured materials', why: 'Why GM Andreou Marmi', cta: 'Final call to action' };
 
 export default function Content() {
   const { tab = 'home' } = useParams();
@@ -114,7 +112,7 @@ export default function Content() {
         const arr: any[] = val || [];
         return (
           <div className="space-y-1">
-            {arr.map((s, i) => (
+            {arr.map((s, i) => !SECTION_NAMES[s.key] ? null : (
               <div key={s.key} draggable onDragStart={() => setDrag(i)} onDragOver={(e) => e.preventDefault()}
                 onDrop={() => { if (drag === null) return; const n = [...arr]; const [x] = n.splice(drag, 1); n.splice(i, 0, x); setDrag(null); put(key, n); }}
                 className="flex cursor-grab items-center justify-between border border-charcoal/10 bg-ivory px-4 py-2.5">

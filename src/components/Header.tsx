@@ -5,7 +5,7 @@ import { useSite } from '../lib/site';
 import { scrollLock, scrollTopSmooth } from '../lib/motion';
 import { useEnquiry } from './EnquiryDrawer';
 
-const OVERLAY = [/^\/$/, /^\/about$/, /^\/contact$/, /^\/collections\/[^/]+$/, /^\/applications\/[^/]+$/, /^\/projects\/[^/]+$/, /^\/materials\/[^/]+$/];
+const OVERLAY = [/^\/$/, /^\/about$/, /^\/contact$/, /^\/applications\/[^/]+$/, /^\/materials\/[^/]+$/];
 
 export function IconInstagram({ className = 'h-4 w-4' }) {
   return <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.4"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r=".8" fill="currentColor" /></svg>;
@@ -27,8 +27,6 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [menu, setMenu] = useState(false);
-  const [sub, setSub] = useState<string | null>(null); // open list in the mobile menu
-  const [drop, setDrop] = useState<string | null>(null); // open dropdown on desktop
 
   useEffect(() => {
     let last = window.scrollY;
@@ -43,8 +41,7 @@ export default function Header() {
     window.addEventListener('scroll', on, { passive: true });
     return () => window.removeEventListener('scroll', on);
   }, []);
-  useEffect(() => { setMenu(false); setDrop(null); }, [pathname]);
-  useEffect(() => { if (!menu) setSub(null); }, [menu]);
+  useEffect(() => { setMenu(false); }, [pathname]);
   // clicking the page you are already on closes the menu and takes you back to the top
   const same = (to: string) => () => {
     if (to !== pathname) return;
@@ -54,17 +51,10 @@ export default function Header() {
   useEffect(() => { scrollLock(menu); }, [menu]);
 
   const light = overlay && !scrolled && !menu;
-  // Applications and Projects are grouped under one "Inspiration" dropdown
-  // and the owner's other companies sit under "Our Group" (edited in the admin)
-  type Item = { to: string; label: string; external?: boolean };
-  const groups: Record<string, { label: string; items: Item[] }> = {
-    inspo: { label: t('inspiration'), items: [{ to: '/applications', label: t('applications') }, { to: '/projects', label: t('projects') }] },
-  };
-  const nav: (readonly [string, string] | 'inspo')[] = [
-    ['/', t('home')], ['/materials', t('materials')], ['/collections', t('collections')], 'inspo',
+  const nav: [string, string][] = [
+    ['/', t('home')], ['/materials', t('materials')], ['/applications', t('applications')],
     ['/about', t('about')], ['/contact', t('contact')], ['/group', t('group')],
   ];
-  const isActive = (k: string) => groups[k].items.some((it) => !it.external && (base === it.to || base.startsWith(it.to + '/')));
 
   return (
     <>
@@ -77,28 +67,7 @@ export default function Header() {
             <img src={light ? '/brand/logo-light.png' : '/brand/logo-dark.png'} alt="G. M. Andreou Marmi Ltd" className="w-full" />
           </Link>
           <nav className="hidden items-center gap-6 xl:flex 2xl:gap-8">
-            {nav.map((item) => typeof item === 'string' ? (
-              <div key={item} className="relative" onMouseEnter={() => setDrop(item)} onMouseLeave={() => setDrop(null)}>
-                <button type="button" onClick={() => setDrop((d) => (d === item ? null : item))} aria-expanded={drop === item} aria-haspopup="true"
-                  className={`ulink flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide2 ${isActive(item) ? 'active' : ''}`}>
-                  {groups[item].label}
-                  <svg className={`h-2.5 w-2.5 transition-transform duration-300 ${drop === item ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="M2 4l4 4 4-4" /></svg>
-                </button>
-                <div className={`absolute top-full pt-5 transition-all duration-300 left-1/2 -translate-x-1/2 ${drop === item ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-1 opacity-0'}`}>
-                  <div className="min-w-[220px] whitespace-nowrap border border-charcoal/10 bg-ivory py-2 text-charcoal shadow-[0_20px_50px_rgba(29,27,25,.12)]">
-                    {groups[item].items.map((it) => it.external ? (
-                      it.to
-                        ? <a key={it.label} href={it.to} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-6 px-6 py-3 text-[11px] font-medium uppercase tracking-wide2 transition-colors hover:bg-stone/60">{it.label}<span className="text-taupe">↗</span></a>
-                        : <span key={it.label} className="block px-6 py-3 text-[11px] font-medium uppercase tracking-wide2 text-warm">{it.label}</span>
-                    ) : (
-                      <NavLink key={it.to} to={lp(it.to)} onClick={same(lp(it.to))} className={({ isActive: on }) => `block px-6 py-3 text-[11px] font-medium uppercase tracking-wide2 transition-colors hover:bg-stone/60 ${on ? 'text-bronze' : ''}`}>
-                        {it.label}
-                      </NavLink>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
+            {nav.map((item) => (
               <NavLink key={item[0]} to={lp(item[0])} onClick={same(lp(item[0]))} end={item[0] === '/'} className={({ isActive }) => `ulink text-[11px] font-medium uppercase tracking-wide2 ${isActive ? 'active' : ''}`}>
                 {item[1]}
               </NavLink>
@@ -129,27 +98,6 @@ export default function Header() {
           <nav className="flex flex-col gap-1">
             {nav.map((item, i) => {
               const anim = { transition: `opacity .6s ${0.15 + i * 0.05}s, transform .9s cubic-bezier(.22,.8,.2,1) ${0.15 + i * 0.05}s`, opacity: menu ? 1 : 0, transform: menu ? 'none' : 'translateY(30px)' };
-              if (typeof item === 'string') return (
-                <div key={item} style={anim}>
-                  <button type="button" onClick={() => setSub((v) => (v === item ? null : item))} aria-expanded={sub === item} className="display flex items-center gap-4 text-[10vw] leading-[1.1] sm:text-6xl">
-                    {groups[item].label}
-                    <svg className={`h-5 w-5 transition-transform duration-500 ${sub === item ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1"><path d="M2 4l4 4 4-4" /></svg>
-                  </button>
-                  <div className={`grid transition-all duration-500 ease-lux ${sub === item ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-                    <div className="overflow-hidden">
-                      <div className="flex flex-col gap-1 border-l border-charcoal/15 py-2 pl-5">
-                        {groups[item].items.map((it) => it.external ? (
-                          it.to
-                            ? <a key={it.label} href={it.to} target="_blank" rel="noreferrer" className="display text-[6vw] leading-[1.25] text-warm sm:text-3xl">{it.label} ↗</a>
-                            : <span key={it.label} className="display text-[6vw] leading-[1.25] text-taupe sm:text-3xl">{it.label}</span>
-                        ) : (
-                          <Link key={it.to} to={lp(it.to)} onClick={same(lp(it.to))} className="display text-[7vw] leading-[1.2] text-warm sm:text-4xl">{it.label}</Link>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
               return (
                 <Link key={item[0]} to={lp(item[0])} onClick={same(lp(item[0]))} className="display text-[10vw] leading-[1.1] sm:text-6xl" style={anim}>
                   {item[1]}

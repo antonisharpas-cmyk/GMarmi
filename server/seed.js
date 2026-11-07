@@ -59,7 +59,7 @@ export async function seedIfEmpty() {
   };
   for (const [k, alt] of Object.entries(list)) M[k] = await media(k, alt);
 
-  // ---------- Brand & collection ----------
+  // ---------- Brand ----------
   const fondovalle = await entry('brand', 'fondovalle', 1, {
     name_en: 'Fondovalle', name_el: 'Fondovalle',
     desc_en: 'Maker of MY TOP ceramic surfaces.', desc_el: 'Κατασκευαστής των κεραμικών επιφανειών MY TOP.',
@@ -107,25 +107,13 @@ export async function seedIfEmpty() {
     app[slug] = await entry('application', slug, i++, { name_en: en, name_el: el, desc_en: den, desc_el: del, product_ids: [] }, [M[img]]);
   }
 
-  // ---------- Collection ----------
-  const mytop = await entry('collection', 'my-top', 1, {
-    name_en: 'MY TOP', name_el: 'MY TOP',
-    tagline_en: 'Ceramic surfaces without limits.', tagline_el: 'Κεραμικές επιφάνειες χωρίς περιορισμούς.',
-    desc_en: 'MY TOP by Fondovalle. Ceramic surfaces applied as one continuous piece on countertops, islands and cladding, offering clean aesthetics and architectural continuity in every space.',
-    desc_el: 'MY TOP by Fondovalle. Κεραμικές επιφάνειες που εφαρμόζονται ενιαία σε πάγκους, νησίδες και επενδύσεις, προσφέροντας καθαρή αισθητική και αρχιτεκτονική συνέχεια σε κάθε χώρο.',
-    body_en: 'Heat resistant. Scratch resistant. Stain resistant. 100% hygienic. For kitchens, bathrooms, staircases and cladding.',
-    body_el: 'Ανθεκτικό στη θερμότητα. Δεν χαράζεται. Δεν λεκιάζει. 100% υγιεινό. Για κουζίνες, μπάνια, σκαλοπάτια και επενδύσεις.',
-    brand_id: fondovalle,
-    application_ids: Object.values(app),
-  }, [M['fantasy-dark-1'], M['magnus-1'], M['travertino-ebur-1'], M['mytop-06-1'], M['mytop-04-1']], { featured: true });
-
   // ---------- Products ----------
   const mytopFeatures = {
     en: ['Heat resistant', 'Scratch resistant', 'Stain resistant', '100% hygienic', 'Zero maintenance'],
     el: ['Ανθεκτικό στη θερμότητα', 'Δεν χαράζεται', 'Δεν λεκιάζει', '100% υγιεινό', 'Μηδενική συντήρηση'],
   };
   const base = (o) => ({
-    category_id: cat.porcelain, collection_id: mytop, brand_id: fondovalle,
+    category_id: cat.porcelain, brand_id: fondovalle,
     specs: { material_en: 'Porcelain', material_el: 'Πορσελάνη', finish_en: '', finish_el: '', thickness: '', dimensions: '', colour_en: '', colour_el: '' },
     specs_extra: [],
     ...o,
@@ -275,9 +263,8 @@ export async function seedIfEmpty() {
       intro_words_el: ['Πέτρα.', 'Επιφάνεια.', 'Χώρος.'],
       intro_images: [M['fantasy-dark-3'], M['travertino-ebur-2'], M['mytop-07-1']],
       story_image: M['fantasy-dark-2'],
-      story_lines_en: ['Natural character', 'Unique veining.', 'Timeless depth.', 'Explore the collection'],
-      story_lines_el: ['Φυσικός χαρακτήρας', 'Μοναδικά νερά.', 'Διαχρονικό βάθος.', 'Δείτε τη συλλογή'],
-      featured_collection: mytop,
+      story_lines_en: ['Natural character', 'Unique veining.', 'Timeless depth.', 'Explore materials'],
+      story_lines_el: ['Φυσικός χαρακτήρας', 'Μοναδικά νερά.', 'Διαχρονικό βάθος.', 'Δείτε τα υλικά'],
       featured_products: [P.fantasy, P.travertino, P.magnus, P['mytop-ref-06'], P['mytop-ref-04'], P['mytop-ref-08']],
       why: [
         { t_en: 'Curated surfaces', t_el: 'Επιλεγμένες επιφάνειες', d_en: 'A considered selection of marble, granite, engineered quartz and porcelain slabs.', d_el: 'Μια προσεγμένη επιλογή από μάρμαρα, γρανίτες, τεχνητό χαλαζία και πλάκες πορσελάνης.' },
@@ -291,8 +278,8 @@ export async function seedIfEmpty() {
       cta_image: M['mytop-08-1'],
       sections: [
         { key: 'hero', visible: true }, { key: 'intro', visible: true }, { key: 'materials', visible: true },
-        { key: 'story', visible: true }, { key: 'collection', visible: true }, { key: 'applications', visible: true },
-        { key: 'showcase', visible: true }, { key: 'projects', visible: true }, { key: 'why', visible: true }, { key: 'cta', visible: true },
+        { key: 'story', visible: true }, { key: 'applications', visible: true },
+        { key: 'showcase', visible: true }, { key: 'why', visible: true }, { key: 'cta', visible: true },
       ],
     },
     about: {

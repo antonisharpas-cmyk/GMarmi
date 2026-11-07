@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import type { Img } from '../lib/types';
 import { Area, Badge, Btn, Card, Field, Input, PageHead, Sel, Toggle, useLoad, useToast } from './common';
-import { ImageManager, SingleImage } from './Media';
+import { ImageManager } from './Media';
 
 type F = { k: string; label: string; type: 'text' | 'area' | 'rel' | 'multi' | 'bool' | 'lines' | 'kv' | 'choice' | 'formats'; rel?: string; choices?: string[]; bi?: boolean; hint?: string; wide?: boolean };
 
@@ -16,7 +16,6 @@ export const TYPES: Record<string, { label: string; plural: string; publicPath?:
       { k: 'tagline', label: 'Tagline', type: 'text', bi: true, wide: true },
       { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true },
       { k: 'category_id', label: 'Category', type: 'rel', rel: 'category' },
-      { k: 'collection_id', label: 'Collection', type: 'rel', rel: 'collection' },
       { k: 'brand_id', label: 'Brand', type: 'rel', rel: 'brand' },
       { k: 'exclusive', label: 'Exclusive to GM Andreou Marmi', type: 'bool' },
       { k: 'application_ids', label: 'Applications', type: 'multi', rel: 'application', wide: true },
@@ -33,28 +32,13 @@ export const TYPES: Record<string, { label: string; plural: string; publicPath?:
     fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true },
       { k: 'formats', label: 'Sizes (shown on the category page with a drawing of each slab)', type: 'formats', wide: true },
       { k: 'custom_sizes', label: 'Cut to any size (shows "Cut to any size" when no sizes are listed)', type: 'bool', wide: true }] },
-  collection: { label: 'Collection', plural: 'Collections', images: true, publicPath: (e) => `/collections/${e.slug}`,
-    fields: [
-      { k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'tagline', label: 'Tagline', type: 'text', bi: true, wide: true },
-      { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true }, { k: 'body', label: 'Extra text', type: 'area', bi: true, wide: true },
-      { k: 'brand_id', label: 'Brand', type: 'rel', rel: 'brand' }, { k: 'application_ids', label: 'Applications', type: 'multi', rel: 'application', wide: true },
-    ] },
   application: { label: 'Application', plural: 'Applications', images: true, publicPath: (e) => `/applications/${e.slug}`,
     fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true },
       { k: 'body', label: 'Extra text', type: 'area', bi: true, wide: true }, { k: 'category_ids', label: 'Material categories for this application', type: 'multi', rel: 'category', wide: true },
       { k: 'product_ids', label: 'Materials', type: 'multi', rel: 'product', wide: true }] },
-  project: { label: 'Project', plural: 'Projects', images: true, publicPath: (e) => `/projects/${e.slug}`,
-    fields: [
-      { k: 'name', label: 'Title', type: 'text', bi: true }, { k: 'location', label: 'Location', type: 'text', bi: true },
-      { k: 'category', label: 'Project category', type: 'text', bi: true, hint: 'e.g. Residential, Hospitality' },
-      { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true }, { k: 'body', label: 'Story', type: 'area', bi: true, wide: true },
-      { k: 'product_ids', label: 'Materials used', type: 'multi', rel: 'product', wide: true },
-      { k: 'collection_ids', label: 'Collections', type: 'multi', rel: 'collection', wide: true },
-      { k: 'application_ids', label: 'Applications', type: 'multi', rel: 'application', wide: true },
-    ] },
-  brand: { label: 'Brand', plural: 'Brands', images: true, fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true }, { k: 'website', label: 'Website', type: 'text' }] },
+  brand: { label: 'Brand', plural: 'Brands', images: true, fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true }] },
   faq: { label: 'FAQ', plural: 'FAQs', images: false,
-    fields: [{ k: 'category', label: 'Category', type: 'choice', choices: ['materials', 'products', 'projects', 'orders', 'showroom', 'general'] },
+    fields: [{ k: 'category', label: 'Category', type: 'choice', choices: ['materials', 'products', 'orders', 'showroom', 'general'] },
       { k: 'q', label: 'Question', type: 'text', bi: true, wide: true }, { k: 'a', label: 'Answer', type: 'area', bi: true, wide: true }] },
 };
 

@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { Badge, Btn, Card, ENQ_TYPES, fmtDate, Input, PasswordInput, MeCtx, PageHead, Sel, ToastProvider, useLoad, useMe, useToast, type Me } from './common';
 import { EntityEdit, EntityList, TYPES } from './Entities';
 import MediaLibrary from './Media';
 import Content from './Content';
+
+// old links to removed sections (Collections, Projects) go back to the dashboard
+function Known({ children }: { children: React.ReactNode }) {
+  const { type = '' } = useParams();
+  return TYPES[type] ? <>{children}</> : <Navigate to="/admin" replace />;
+}
 import { Chats, EnquiryDetail, Enquiries } from './Inbox';
 
 function Login({ onIn }: { onIn: (m: Me) => void }) {
@@ -41,8 +47,8 @@ function Dashboard() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stat('New enquiries', d.enquiries.new, '/admin/enquiries')}{stat('Unread enquiries', d.enquiries.unread, '/admin/enquiries')}
         {stat('Open chats', d.chats.open, '/admin/chat')}{stat('Unread chat messages', d.chats.unread, '/admin/chat')}
-        {stat('Products', d.counts.product, '/admin/content/product')}{stat('Collections', d.counts.collection, '/admin/content/collection')}
-        {stat('Projects', d.counts.project, '/admin/content/project')}{stat('Categories', d.counts.category, '/admin/content/category')}
+        {stat('Products', d.counts.product, '/admin/content/product')}{stat('Applications', d.counts.application, '/admin/content/application')}
+        {stat('Brands', d.counts.brand, '/admin/content/brand')}{stat('Categories', d.counts.category, '/admin/content/category')}
       </div>
       <div className="mt-6 grid gap-6 xl:grid-cols-3">
         <Card title="Recent enquiries" className="xl:col-span-2" action={<Link to="/admin/enquiries" className="text-xs underline">All</Link>}>
@@ -140,10 +146,7 @@ function Shell() {
         {p.includes('content') && (
           <>
             <div className="mt-6 px-5 pb-2 text-[10px] uppercase tracking-wide2 text-ivory/35">Catalogue</div>
-            {['product', 'category', 'collection', 'brand', 'faq'].map((t) => link(`/admin/content/${t}`, TYPES[t].plural))}
-            {/* same grouping as the website menu: Applications and Projects live under Inspiration */}
-            <div className="mt-6 px-5 pb-2 text-[10px] uppercase tracking-wide2 text-ivory/35">Inspiration</div>
-            {['application', 'project'].map((t) => link(`/admin/content/${t}`, TYPES[t].plural))}
+            {['product', 'category', 'application', 'brand', 'faq'].map((t) => link(`/admin/content/${t}`, TYPES[t].plural))}
           </>
         )}
         {(p.includes('media') || p.includes('settings')) && <div className="mt-6 px-5 pb-2 text-[10px] uppercase tracking-wide2 text-ivory/35">Website</div>}
@@ -166,8 +169,8 @@ function Shell() {
           <Route path="enquiries/:id" element={<EnquiryDetail />} />
           <Route path="chat" element={<Chats />} />
           <Route path="chat/:id" element={<Chats />} />
-          <Route path="content/:type" element={<EntityList />} />
-          <Route path="content/:type/:id" element={<EntityEdit />} />
+          <Route path="content/:type" element={<Known><EntityList /></Known>} />
+          <Route path="content/:type/:id" element={<Known><EntityEdit /></Known>} />
           <Route path="media" element={<MediaLibrary />} />
           <Route path="website/:tab" element={<Content />} />
           <Route path="users" element={<Users />} />

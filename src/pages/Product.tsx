@@ -5,7 +5,7 @@ import { useApi } from '../lib/site';
 import { track } from '../lib/api';
 import { gsap, reduced } from '../lib/motion';
 import { Picture, Reveal, RiseText, FadeUp } from '../components/Reveal';
-import { Lightbox, Loading, NotFoundBlock, ProductGrid, Tile, useTitle, variantAt } from '../components/ui';
+import { Lightbox, Loading, NotFoundBlock, ProductGrid, useTitle, variantAt } from '../components/ui';
 import { useEnquiry } from '../components/EnquiryDrawer';
 import type { Entry } from '../lib/types';
 
@@ -35,7 +35,6 @@ export default function Product() {
   const specs: [string, string][] = ([
     [t('material'), tr(p.specs, 'material')],
     [t('brand'), r.brand ? tr(r.brand, 'name') : ''],
-    [t('collection'), r.collection ? tr(r.collection, 'name') : ''],
     [t('finish'), tr(p.specs, 'finish')],
     [t('thickness'), p.specs?.thickness],
     [t('dimensions'), p.specs?.dimensions],
@@ -58,7 +57,7 @@ export default function Product() {
             <span className="text-charcoal">{tr(p, 'name')}</span>
           </nav>
           <div className="pd-fade eyebrow mb-5 flex gap-3">
-            {r.collection && <span>{tr(r.collection, 'name')}</span>}{r.brand && <span className="text-taupe">by {tr(r.brand, 'name')}</span>}
+            {r.brand && <span className="text-taupe">by {tr(r.brand, 'name')}</span>}
           </div>
           <RiseText as="h1" className="h-xl" trigger={false} delay={0.4}>{tr(p, 'name')}</RiseText>
           {tr(p, 'tagline') && <p className="pd-fade mt-6 font-display text-2xl font-light italic leading-snug text-brown">{tr(p, 'tagline')}</p>}
@@ -118,15 +117,6 @@ export default function Product() {
                 </button>
               ))}
             </div>
-          </div>
-        </section>
-      )}
-
-      {r.projects?.length > 0 && (
-        <section className="wrap py-24">
-          <div className="eyebrow mb-12">{t('relatedProjects')}</div>
-          <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-            {r.projects.map((x: Entry, i: number) => <Tile key={x.id} e={x} i={i} to={lp(`/projects/${x.slug}`)} cursor="view" />)}
           </div>
         </section>
       )}

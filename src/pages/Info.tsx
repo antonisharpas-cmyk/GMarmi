@@ -11,7 +11,7 @@ import type { Entry } from '../lib/types';
 
 export function About() {
   const s = useSite();
-  const { t, tr, lp } = useLang();
+  const { t, tr } = useLang();
   useTitle(t('about'));
   if (!s) return <Loading />;
   const a = s.about;
@@ -52,10 +52,9 @@ export function About() {
           <div className="eyebrow mb-10">{t('partners')}</div>
           <div className="grid gap-px bg-charcoal/10 sm:grid-cols-2 lg:grid-cols-3">
             {s.brands.map((b) => {
-              const inner = (<>{b.cover ? <img src={b.cover.md} alt={tr(b, 'name')} className="mb-5 h-14 w-auto max-w-[180px] object-contain" loading="lazy" /> : null}<div className="caps text-2xl">{tr(b, 'name')}</div>{tr(b, 'desc') && <p className="mt-3 text-sm leading-relaxed text-warm">{tr(b, 'desc')}</p>}{b.website && <span className="arrow mt-6 block text-sm">↗</span>}</>);
-              return b.website
-                ? <a key={b.id} href={b.website} target="_blank" rel="noreferrer" className="group block bg-ivory p-8 transition-colors hover:bg-marble">{inner}</a>
-                : <div key={b.id} className="bg-ivory p-8">{inner}</div>;
+              const inner = (<>{b.cover ? <img src={b.cover.md} alt={tr(b, 'name')} className="mb-5 h-14 w-auto max-w-[180px] object-contain" loading="lazy" /> : null}<div className="caps text-2xl">{tr(b, 'name')}</div>{tr(b, 'desc') && <p className="mt-3 text-sm leading-relaxed text-warm">{tr(b, 'desc')}</p>}</>);
+              // partners are shown without links, so visitors stay on the website
+              return <div key={b.id} className="bg-ivory p-8">{inner}</div>;
             })}
           </div>
         </section>
@@ -158,7 +157,7 @@ function ContactFaq() {
 }
 
 export function Faq() {
-  const { t, tr, lang } = useLang();
+  const { t, tr } = useLang();
   const { data } = useApi<Entry[]>('/api/entries/faq');
   const [open, setOpen] = useState<number | null>(0);
   useTitle(t('faq'));
@@ -202,7 +201,7 @@ export function LinkPage() {
   const { t, tr, lp } = useLang();
   if (!s) return <Loading />;
   const links: [string, string, boolean?][] = [
-    [lp('/materials'), t('materials')], [lp('/collections'), t('collections')], [lp('/applications'), t('applications')],
+    [lp('/materials'), t('materials')], [lp('/applications'), t('applications')],
     [lp('/contact'), t('contact')], [`tel:${s.site.phone_raw}`, `${t('phone')} · ${s.site.phone}`, true], [`mailto:${s.site.email}`, s.site.email, true],
   ];
   return (

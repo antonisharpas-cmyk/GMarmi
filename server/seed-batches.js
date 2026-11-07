@@ -49,7 +49,6 @@ async function batch2() {
 
   const fondovalle = await idOf('brand', 'fondovalle');
   const porcelain = await idOf('category', 'porcelain-slabs');
-  const mytop = await idOf('collection', 'my-top');
 
   // Fondovalle description from the "Η κορυφαία ιταλική αισθητική" post (only if still the seeded text)
   const fb = await one(`SELECT data FROM entries WHERE id=$1`, [fondovalle]);
@@ -70,23 +69,6 @@ async function batch2() {
   const A = {};
   for (const s of ['kitchens', 'bathrooms', 'countertops-islands', 'wall-cladding', 'staircases', 'hospitality', 'flooring']) A[s] = await idOf('application', s);
 
-  // Collections
-  const infinito = await entry('collection', 'infinito-2-0', {
-    name_en: 'Infinito 2.0', name_el: 'Infinito 2.0',
-    tagline_en: 'Rare stones, in slabs of 163 x 324 cm.', tagline_el: 'Σπάνιες πέτρες, σε πλάκες 163 x 324 cm.',
-    desc_en: 'Infinito 2.0 by Fondovalle, part of the MY TOP range. Large 12 mm slabs of 163 x 324 cm that reinterpret rare marbles and stones, in 3D Texture and ALL LIGHT polished surfaces.',
-    desc_el: 'Η σειρά Infinito 2.0 της Fondovalle, μέρος της γκάμας MY TOP. Μεγάλες πλάκες 12 mm, 163 x 324 cm, που αναπαράγουν σπάνια μάρμαρα και πέτρες, σε επιφάνειες 3D Texture και ALL LIGHT γυαλιστερές.',
-    brand_id: fondovalle,
-    application_ids: [A.kitchens, A.bathrooms, A['countertops-islands'], A['wall-cladding'], A.hospitality],
-  }, [M['calacatta-paris-1'], M['tiger-1'], M['labradorite-1'], M['cream-diamonds-1'], M['calacatta-paris-2']]);
-  const stonelab = await entry('collection', 'stone-lab', {
-    name_en: 'Stone Lab', name_el: 'Stone Lab',
-    tagline_en: 'Travertines and stones, with a natural touch.', tagline_el: 'Travertino και πέτρες, με φυσική αφή.',
-    desc_en: 'Stone Lab by Fondovalle, part of the MY TOP range. Travertines and stones in 12 mm slabs of 163 x 324 cm, with Real Matt and Full 3D Texture surfaces.',
-    desc_el: 'Η σειρά Stone Lab της Fondovalle, μέρος της γκάμας MY TOP. Travertino και πέτρες σε πλάκες 12 mm, 163 x 324 cm, με επιφάνειες Real Matt και Full 3D Texture.',
-    brand_id: fondovalle,
-    application_ids: [A.kitchens, A.bathrooms, A['countertops-islands'], A.flooring],
-  }, [M['fuscus-1'], M['sikelia-1'], M['fuscus-2']]);
 
   const P = (o) => ({
     category_id: porcelain, brand_id: fondovalle, specs_extra: [],
@@ -99,7 +81,7 @@ async function batch2() {
   const allLight = { finish_en: 'ALL LIGHT polished', finish_el: 'ALL LIGHT γυαλιστερό' };
 
   await entry('product', 'royal-travertino-ebur-vein', P({
-    name_en: 'Royal Travertino Ebur Vein', name_el: 'Royal Travertino Ebur Vein', collection_id: mytop,
+    name_en: 'Royal Travertino Ebur Vein', name_el: 'Royal Travertino Ebur Vein',
     tagline_en: 'A perfectly matt finish with a velvety touch.', tagline_el: 'Απόλυτα ματ φινίρισμα με βελούδινη αφή.',
     desc_en: 'The soft, vein cut look of ivory travertine for kitchens, floors and walls. Its Real Matt surface is perfectly matt with a velvety touch, for remarkable authenticity and realism.',
     desc_el: 'Η απαλή όψη του ιβουάρ travertino για κουζίνες, δάπεδα και τοίχους. Η επιφάνεια Real Matt είναι απόλυτα ματ με βελούδινη αφή, για εντυπωσιακή αυθεντικότητα και ρεαλισμό.',
@@ -111,7 +93,7 @@ async function batch2() {
   }), [M['ebur-vein-1'], M['ebur-vein-2'], M['ebur-vein-swatch'], M['real-matt']]);
 
   await entry('product', 'travertino-fuscus', P({
-    name_en: 'Travertino Fuscus', name_el: 'Travertino Fuscus', collection_id: stonelab,
+    name_en: 'Travertino Fuscus', name_el: 'Travertino Fuscus',
     tagline_en: 'Dark travertine with the realism of Real Matt.', tagline_el: 'Σκούρο travertino με τον ρεαλισμό του Real Matt.',
     desc_en: 'The remarkable authenticity and realism of the innovative Real Matt surface. Travertino Fuscus brings the depth of dark travertine to bathrooms, vanities, walls and floors.',
     desc_el: 'Η εντυπωσιακή αυθεντικότητα και ο ρεαλισμός της καινοτόμου επιφάνειας Real Matt. Το Travertino Fuscus φέρνει το βάθος του σκούρου travertino σε μπάνια, πάγκους νιπτήρων, τοίχους και δάπεδα.',
@@ -123,7 +105,7 @@ async function batch2() {
   }), [M['fuscus-1'], M['fuscus-2'], M['fuscus-swatch']]);
 
   await entry('product', 'sikelia', P({
-    name_en: 'Sikelia', name_el: 'Sikelia', collection_id: stonelab,
+    name_en: 'Sikelia', name_el: 'Sikelia',
     tagline_en: 'Inspired by the stones of Southern Italy.', tagline_el: 'Εμπνευσμένο από τις πέτρες της Νότιας Ιταλίας.',
     desc_en: 'Inspired by the stones of Southern Italy, Sikelia offers a texture full of details and strong realism. Carefully calibrated and balanced, it presents itself as a neutral surface, yet never mundane, thanks to its richness in details.',
     desc_el: 'Εμπνευσμένο από τις πέτρες της Νότιας Ιταλίας, το Sikelia προσφέρει μια υφή γεμάτη λεπτομέρειες και έντονο ρεαλισμό. Προσεκτικά ισορροπημένο, παρουσιάζεται ως μια ουδέτερη επιφάνεια, ποτέ όμως κοινότοπη, χάρη στον πλούτο των λεπτομερειών του.',
@@ -134,7 +116,7 @@ async function batch2() {
   }), [M['sikelia-1'], M['sikelia-swatch']]);
 
   await entry('product', 'labradorite-royale', P({
-    name_en: 'Labradorite Royale', name_el: 'Labradorite Royale', collection_id: infinito,
+    name_en: 'Labradorite Royale', name_el: 'Labradorite Royale',
     tagline_en: 'Iridescent blue, polished to catch the light.', tagline_el: 'Ιριδίζον μπλε, γυαλισμένο για να πιάνει το φως.',
     desc_en: 'Iridescent reflections bring out the depth of blue and grey tones, while dense and subtle veins create the elegant pattern typical of Labradorite.',
     desc_el: 'Ιριδίζουσες ανταύγειες αναδεικνύουν το βάθος των μπλε και γκρι τόνων, ενώ πυκνά και λεπτά νερά δημιουργούν το κομψό σχέδιο που χαρακτηρίζει τον Λαβραδορίτη.',
@@ -145,7 +127,7 @@ async function batch2() {
   }), [M['labradorite-1'], M['labradorite-swatch']], { featured: true });
 
   await entry('product', 'calacatta-paris', P({
-    name_en: 'Calacatta Paris', name_el: 'Calacatta Paris', collection_id: infinito,
+    name_en: 'Calacatta Paris', name_el: 'Calacatta Paris',
     tagline_en: 'A pale marble with contrasting dark veins.', tagline_el: 'Ανοιχτόχρωμο μάρμαρο με σκούρες φλέβες.',
     desc_en: 'A pale marble featuring contrasting dark veins, intertwined to form a gently dappled effect.',
     desc_el: 'Ένα ανοιχτόχρωμο μάρμαρο με σκούρες φλέβες σε αντίθεση, που πλέκονται μεταξύ τους δημιουργώντας ένα απαλό, διάστικτο αποτέλεσμα.',
@@ -156,7 +138,7 @@ async function batch2() {
   }), [M['calacatta-paris-1'], M['calacatta-paris-2'], M['calacatta-paris-swatch']], { featured: true });
 
   await entry('product', 'tiger', P({
-    name_en: 'Tiger', name_el: 'Tiger', collection_id: infinito,
+    name_en: 'Tiger', name_el: 'Tiger',
     tagline_en: 'A pattern that radiates light.', tagline_el: 'Ένα σχέδιο που ακτινοβολεί φως.',
     desc_en: 'Bold veining and warm shades create a stunning pattern that radiates light. Pictured with Woodblock Brave Stripy Oak 120 x 278.',
     desc_el: 'Έντονες φλέβες και ζεστές αποχρώσεις δημιουργούν ένα εντυπωσιακό σχέδιο που ακτινοβολεί φως. Στη φωτογραφία μαζί με Woodblock Brave Stripy Oak 120 x 278.',
@@ -167,7 +149,7 @@ async function batch2() {
   }), [M['tiger-1'], M['tiger-2'], M['tiger-swatch']], { featured: true });
 
   await entry('product', 'cream-diamonds', P({
-    name_en: 'Cream Diamonds', name_el: 'Cream Diamonds', collection_id: infinito,
+    name_en: 'Cream Diamonds', name_el: 'Cream Diamonds',
     tagline_en: 'Millennia of history in a contemporary space.', tagline_el: 'Χιλιετίες ιστορίας σε έναν σύγχρονο χώρο.',
     desc_en: 'With 3D Texture surface technology, Cream Diamonds delivers unprecedented depth of look and detail. With its soft, enticing beauty, this interpretation evokes millennia of history within contemporary living spaces.',
     desc_el: 'Με την τεχνολογία επιφάνειας 3D Texture, το Cream Diamonds προσφέρει πρωτόγνωρο βάθος όψης και λεπτομέρειας. Με την απαλή, γοητευτική ομορφιά του, ζωντανεύει χιλιετίες ιστορίας μέσα σε σύγχρονους χώρους.',
@@ -395,7 +377,6 @@ async function batch8() {
 // Batch 9: three MY TOP Infinito 2.0 kitchen colours (images from fondovalle.it)
 async function batch9() {
   const cat = await idOf('category', 'mytop-fondovalle');
-  const col = await idOf('collection', 'infinito-2-0');
   const brand = await idOf('brand', 'fondovalle');
   const kitchens = await idOf('application', 'kitchens');
   const islands = await idOf('application', 'countertops-islands');
@@ -412,7 +393,7 @@ async function batch9() {
     const amb = await media(`${slug}-kitchen`, `${name} kitchen by MY TOP Fondovalle`);
     const sw = await media(`${slug}-swatch`, `${name} slab`);
     const data = {
-      name_en: name, name_el: name, category_id: cat, collection_id: col, brand_id: brand,
+      name_en: name, name_el: name, category_id: cat, brand_id: brand,
       tagline_en: den, tagline_el: del, desc_en: `${den} MY TOP Infinito 2.0 by Fondovalle.`, desc_el: `${del} MY TOP Infinito 2.0 της Fondovalle.`,
       features_en: [], features_el: [], specs_extra: [],
       specs: { material_en: 'Porcelain', material_el: 'Πορσελάνη', finish_en: fen, finish_el: fel, thickness: formats.map((f) => `${f.t} mm`).join(', '), dimensions: '163 x 324 cm', colour_en: cen, colour_el: cel },
@@ -442,7 +423,7 @@ async function batch10() {
     const amb = await media(`${slug}-kitchen`, `${name} kitchen by RAK Ceramics Maximus`);
     const sw = await media(`${slug}-swatch`, `${name} slab`);
     const data = {
-      name_en: name, name_el: name, category_id: cat, collection_id: null, brand_id: brand,
+      name_en: name, name_el: name, category_id: cat, brand_id: brand,
       tagline_en: den, tagline_el: del, desc_en: `${den} Maximus slabs by RAK Ceramics.`, desc_el: `${del} Πλάκες Maximus της RAK Ceramics.`,
       features_en: [], features_el: [], specs_extra: [],
       specs: { material_en: 'Porcelain', material_el: 'Πορσελάνη', finish_en: fen, finish_el: fel, dimensions: dims, colour_en: cen, colour_el: cel },
@@ -453,7 +434,25 @@ async function batch10() {
   }
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10 };
+// Collections and Projects were removed from the website: delete them and every reference to them
+async function batch11() {
+  await q(`DELETE FROM entries WHERE type IN ('collection','project')`);
+  await q(`UPDATE entries SET data = json_remove(data, '$.collection_id') WHERE type='product'`);
+  await q(`UPDATE entries SET data = json_remove(data, '$.collection_ids') WHERE type='application'`);
+  await q(`UPDATE entries SET data = json_remove(data, '$.website') WHERE type='brand'`);
+  const row = await one(`SELECT value FROM settings WHERE key='home'`);
+  if (row) {
+    const h = row.value;
+    delete h.featured_collection;
+    h.sections = (h.sections || []).filter((x) => x.key !== 'collection' && x.key !== 'projects');
+    const fix = (arr, from, to) => (Array.isArray(arr) ? arr.map((l) => (l === from ? to : l)) : arr);
+    h.story_lines_en = fix(h.story_lines_en, 'Explore the collection', 'Explore materials');
+    h.story_lines_el = fix(h.story_lines_el, 'Δείτε τη συλλογή', 'Δείτε τα υλικά');
+    await q(`UPDATE settings SET value=$1, updated_at=NOW() WHERE key='home'`, [JSON.stringify(h)]);
+  }
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);

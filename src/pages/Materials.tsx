@@ -31,7 +31,6 @@ export default function Materials() {
     };
     const apps = s?.applications || [];
     return [
-      mk('collection', t('collection'), base.map((p) => { const c = s?.collections.find((x) => x.id === p.collection_id); return { value: c?.slug || '', label: c ? tr(c, 'name') : '' }; })),
       mk('brand', t('brand'), base.map((p) => { const b = s?.brands.find((x) => x.id === p.brand_id); return { value: b?.slug || '', label: b ? tr(b, 'name') : '' }; })),
       mk('colour', t('colour'), base.map((p) => ({ value: p.specs?.colour_en || '', label: tr(p.specs, 'colour') }))),
       mk('finish', t('finish'), base.map((p) => ({ value: p.specs?.finish_en || '', label: tr(p.specs, 'finish') }))),
@@ -43,7 +42,6 @@ export default function Materials() {
 
   const filtered = base.filter((p) => {
     const f = (k: string) => sp.get(k);
-    if (f('collection') && s?.collections.find((x) => x.id === p.collection_id)?.slug !== f('collection')) return false;
     if (f('brand') && s?.brands.find((x) => x.id === p.brand_id)?.slug !== f('brand')) return false;
     if (f('colour') && p.specs?.colour_en !== f('colour')) return false;
     if (f('finish') && p.specs?.finish_en !== f('finish')) return false;

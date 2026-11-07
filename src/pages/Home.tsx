@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../lib/i18n';
-import { useSite, useApi, productPath } from '../lib/site';
+import { useSite, productPath } from '../lib/site';
 import { gsap, reduced, ScrollTrigger } from '../lib/motion';
 import { Picture, Reveal, RiseText, FadeUp } from '../components/Reveal';
 import { Tile, SectionHead, Loading, variantAt } from '../components/ui';
@@ -188,48 +188,6 @@ function Story({ img, lines, link }: { img: Img; lines: string[]; link: string }
   );
 }
 
-/* ---------------- 5. FEATURED COLLECTION (expanding image) ---------------- */
-function Collection({ c }: { c: Entry }) {
-  const { tr, t, lp } = useLang();
-  const ref = useRef<HTMLElement>(null);
-  const r = reduced();
-  useLayoutEffect(() => {
-    if (!ref.current || r) return;
-    const mm = gsap.matchMedia();
-    mm.add('(min-width: 768px)', () => {
-      const tl = gsap.timeline({ scrollTrigger: { trigger: ref.current, start: 'top top', end: '+=200%', scrub: 1, pin: true } });
-      tl.fromTo('.cx-frame', { width: '46vw', height: '64vh' }, { width: '100vw', height: '100vh', ease: 'power2.inOut', duration: 2 })
-        .fromTo('.cx-frame img', { scale: 1.3 }, { scale: 1, ease: 'power2.inOut', duration: 2 }, 0)
-        .to('.cx-side', { opacity: 0, y: -30, duration: 0.6 }, 0.1)
-        .fromTo('.cx-over', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8 }, 1.5)
-        .to({}, { duration: 0.5 });
-    });
-    return () => mm.revert();
-  }, [r]);
-  return (
-    <section ref={ref} className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-ivory py-24 md:h-[100svh] md:py-0">
-      <div className="cx-side absolute left-0 top-1/2 hidden w-[27vw] -translate-y-1/2 pl-[4vw] pr-[2vw] md:block">
-        <div className="eyebrow mb-6">{t('collection')}</div>
-        <div className="display text-[5.6vw] leading-[0.95]">{tr(c, 'name')}</div>
-      </div>
-      <div className="cx-side absolute right-0 top-1/2 hidden w-[27vw] -translate-y-1/2 pl-[2vw] pr-[4vw] md:block">
-        <div className="eyebrow mb-6 leading-relaxed">{tr(c, 'tagline')}</div>
-        <p className="text-sm leading-[1.8] text-warm">{tr(c, 'desc')}</p>
-      </div>
-      <div className="cx-frame relative h-[70vh] w-[90vw] overflow-hidden bg-ink text-ivory md:h-auto md:w-auto" data-dark>
-        <Picture img={c.cover} />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
-        <div className="cx-over absolute inset-x-0 bottom-0 p-8 sm:p-14 lg:p-20">
-          <div className="eyebrow mb-5 text-sand">{t('collection')}</div>
-          <h2 className="h-xl">{tr(c, 'name')}</h2>
-          <p className="mt-6 max-w-xl text-[15px] leading-[1.8] text-ivory/80">{tr(c, 'body') || tr(c, 'desc')}</p>
-          <Link to={lp(`/collections/${c.slug}`)} className="btn btn-light group mt-10" data-cursor="explore"><span>{t('exploreCollection')}</span><span className="arrow">→</span></Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ---------------- 6. APPLICATIONS ---------------- */
 function Applications({ apps }: { apps: Entry[] }) {
   const { t, lp, lang } = useLang();
@@ -287,34 +245,6 @@ function Showcase({ items }: { items: Entry[] }) {
   );
 }
 
-/* ---------------- Projects (only when the client has added projects) ---------------- */
-function Projects() {
-  const { t, tr, lp } = useLang();
-  const { data } = useApi<Entry[]>('/api/entries/project');
-  if (!data?.length) return null;
-  const v = ['left', 'right', 'scale', 'mask'] as const;
-  return (
-    <section className="bg-ivory py-28 sm:py-40">
-      <div className="wrap">
-        <SectionHead eyebrow={t('projects')} title={t('projects')} link={lp('/projects')} linkLabel={t('viewAll')} />
-        <div className="space-y-28">
-          {data.slice(0, 4).map((p, i) => (
-            <Link key={p.id} to={lp(`/projects/${p.slug}`)} className={`tile group grid items-end gap-8 lg:grid-cols-12 ${i % 2 ? 'lg:text-right' : ''}`} data-cursor="view">
-              <div className={`lg:col-span-8 ${i % 2 ? 'lg:order-2 lg:col-start-5' : ''}`}>
-                <Reveal variant={v[i % 4]} className="aspect-[16/10] bg-stone"><Picture img={p.cover} /></Reveal>
-              </div>
-              <div className={`lg:col-span-4 ${i % 2 ? 'lg:order-1 lg:row-start-1' : ''}`}>
-                <div className="eyebrow mb-4">{String(i + 1).padStart(2, '0')} · {tr(p, 'location')}</div>
-                <h3 className="h-md">{tr(p, 'name')}</h3>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ---------------- 8. WHY ---------------- */
 function Why({ items }: { items: any[] }) {
   const { tr } = useLang();
@@ -359,16 +289,13 @@ export default function Home() {
   if (!s) return <Loading />;
   const h = s.home;
   const sections: { key: string; visible: boolean }[] = h.sections || [];
-  const col: Entry | null = h.featured_collection;
   const render: Record<string, () => React.ReactNode> = {
     hero: () => <Hero h={h} />,
     intro: () => (h.intro_images?.length >= 3 ? <Intro words={h[`intro_words_${lang}`] || h.intro_words_en} images={h.intro_images} /> : null),
     materials: () => (s.categories.length ? <Materials cats={s.categories} /> : null),
-    story: () => (h.story_image ? <Story img={h.story_image} lines={h[`story_lines_${lang}`] || h.story_lines_en} link={lp(col ? `/collections/${col.slug}` : '/materials')} /> : null),
-    collection: () => (col ? <Collection c={col} /> : null),
+    story: () => (h.story_image ? <Story img={h.story_image} lines={h[`story_lines_${lang}`] || h.story_lines_en} link={lp('/materials')} /> : null),
     applications: () => (s.applications.length ? <Applications apps={s.applications} /> : null),
     showcase: () => (h.featured_products?.length ? <Showcase items={h.featured_products} /> : null),
-    projects: () => <Projects />,
     why: () => (h.why?.length ? <Why items={h.why} /> : null),
     cta: () => <Cta h={h} />,
   };

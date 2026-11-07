@@ -50,13 +50,13 @@ app.get('/media/:id/:size.webp', async (req, res) => {
 });
 
 const BASE = () => (process.env.PUBLIC_URL || '').replace(/\/$/, '');
-const ROUTE = { category: (e) => `/materials/${e.slug}`, collection: (e) => `/collections/${e.slug}`, application: (e) => `/applications/${e.slug}`, project: (e) => `/projects/${e.slug}` };
+const ROUTE = { category: (e) => `/materials/${e.slug}`, application: (e) => `/applications/${e.slug}` };
 
 app.get('/robots.txt', (_req, res) => res.type('text/plain').send(`User-agent: *\nDisallow: /admin\nDisallow: /api\nSitemap: ${BASE()}/sitemap.xml\n`));
 app.get('/sitemap.xml', async (_req, res) => {
-  const rows = await q(`SELECT id, type, slug, data, updated_at FROM entries WHERE published AND type IN ('category','collection','application','project','product')`);
+  const rows = await q(`SELECT id, type, slug, data, updated_at FROM entries WHERE published AND type IN ('category','application','product')`);
   const cats = Object.fromEntries(rows.filter((r) => r.type === 'category').map((r) => [r.id, r.slug]));
-  const paths = ['/', '/materials', '/collections', '/applications', '/projects', '/about', '/contact', '/faq'];
+  const paths = ['/', '/materials', '/applications', '/about', '/contact', '/faq'];
   for (const r of rows) paths.push(r.type === 'product' ? `/materials/${cats[r.data.category_id] || 'all'}/${r.slug}` : ROUTE[r.type](r));
   const urls = paths.flatMap((p) => [p, `/el${p === '/' ? '' : p}`]);
   res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${BASE()}${u}</loc></url>`).join('')}</urlset>`);
@@ -81,7 +81,7 @@ app.get('*', async (req, res) => {
     const seo = await getSetting('seo');
     let title = seo[`title_${L}`], desc = seo[`desc_${L}`], img = '/brand/og-logo.png', ld = null;
     const parts = p.split('/').filter(Boolean);
-    const typeBy = { materials: parts.length === 3 ? 'product' : 'category', collections: 'collection', applications: 'application', projects: 'project' };
+    const typeBy = { materials: parts.length === 3 ? 'product' : 'category', applications: 'application' };
     if (parts.length >= 2 && typeBy[parts[0]]) {
       const type = typeBy[parts[0]];
       const e = await one(`SELECT e.*, m.url, m.id AS mid FROM entries e LEFT JOIN media m ON m.id = COALESCE(e.cover_id, (e.images->>0)::int) WHERE e.type=$1 AND e.slug=$2 AND e.published`, [type, parts[parts.length - 1]]);

@@ -38,8 +38,8 @@ export function ProductGrid({ items }: { items: Entry[] }) {
   return (
     <div className="grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((p, i) => {
-        const col = s?.collections.find((c) => c.id === p.collection_id);
-        return <Tile key={p.id} e={p} i={i} to={lp(productPath(p, s?.categories))} label={col ? tr(col, 'name') : undefined} cursor="view" />;
+        const brand = s?.brands.find((b) => b.id === p.brand_id);
+        return <Tile key={p.id} e={p} i={i} to={lp(productPath(p, s?.categories))} label={brand ? tr(brand, 'name') : undefined} cursor="view" />;
       })}
     </div>
   );

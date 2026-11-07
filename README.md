@@ -35,7 +35,7 @@ server/
   mail.js      Email (SMTP now, any provider later)
   media.js     Image optimisation (WebP, three sizes)
 src/
-  pages/       Home, Materials, Product, Collections, Applications, Projects, About, Contact, FAQ, Legal, /link
+  pages/       Home, Materials, Product, Applications, About, Our Group, Contact, FAQ, Legal, /link
   components/  Header, Footer, Reveal (animation system), Enquiry drawer and form, Chat widget, Cursor
   admin/       Dashboard, catalogue editors, drag and drop images, media library, enquiries, chat inbox, content, users
 docs/PLAN.md   Research, information architecture, user journeys, data model, design and animation system
@@ -46,9 +46,9 @@ docs/PLAN.md   Research, information architecture, user journeys, data model, de
 | Role | Access |
 | --- | --- |
 | Super admin | Everything |
-| Content manager | Products, categories, collections, brands, applications, projects, FAQs, media, website content |
+| Content manager | Products, categories, applications, brands, FAQs, media, website content |
 | Sales / staff | Enquiries and live chat |
 
 ## Content still required from the client
 
-Search the admin for the yellow ⚠ notes. In short: names for MY TOP Ref. 04 to 08, thickness and slab sizes, real marble, granite and quartz photography, opening hours, company history, legal details, project portfolio and the final domain.
+Search the admin for the yellow ⚠ notes. In short: names for MY TOP Ref. 04 to 08, thickness and slab sizes, real marble, granite and quartz photography, opening hours, company history, legal details and the final domain.
