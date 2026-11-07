@@ -379,7 +379,20 @@ async function batch7() {
   await patchSetting('home', { why });
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7 };
+// Batch 8: partner logos
+async function batch8() {
+  for (const slug of ['fondovalle', 'quarella', 'rak-ceramics', 'sachanas-marble', 'rekalis-marble', 'solomonidis-marbles']) {
+    const id = await idOf('brand', slug);
+    if (!id) continue;
+    const cur = await one(`SELECT images FROM entries WHERE id=$1`, [id]);
+    if ((cur?.images || []).length) continue; // a logo was already uploaded in the admin
+    const url = `/seed/logo-${slug}.png`;
+    const m = await one(`INSERT INTO media (filename, alt_en, alt_el, url, url_sm, tags) VALUES ($1,$2,$2,$3,$3,'logo') RETURNING id`, [`logo-${slug}.png`, `${slug} logo`, url]);
+    await q(`UPDATE entries SET images=$2, cover_id=$3 WHERE id=$1`, [id, JSON.stringify([m.id]), m.id]);
+  }
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);

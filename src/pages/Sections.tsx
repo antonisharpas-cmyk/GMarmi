@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLang } from '../lib/i18n';
 import { useApi, useSite, productPath } from '../lib/site';
+import { groupFormats, Slab, SizeLabel } from '../components/SlabFormats';
 import { Picture, Reveal, RiseText, FadeUp } from '../components/Reveal';
 import { Lightbox, Loading, NotFoundBlock, PageHero, PageTitle, ProductGrid, Tile, useTitle, variantAt } from '../components/ui';
 import { useEnquiry } from '../components/EnquiryDrawer';
@@ -63,8 +64,16 @@ function CategoryCard({ c, i }: { c: Entry; i: number }) {
             <Link to={lp(`/materials/${c.slug}`)} className="font-display text-2xl">{tr(c, 'name')}</Link>
             <div className="eyebrow mb-2 mt-5">{t('formats')}</div>
             {formats.length ? (
-              <ul className="space-y-1 text-sm">
-                {formats.map((f, k) => <li key={k} className="flex justify-between gap-4"><span>{f.w} × {f.l} cm</span><span className="text-warm">{String(f.t).split(',').map((x) => `${x.trim()} mm`).join(' · ')}</span></li>)}
+              <ul className="space-y-3 text-sm">
+                {groupFormats(formats).map((f, k) => {
+                  const max = Math.max(...formats.map((x) => Math.max(x.w, x.l)), 1);
+                  return (
+                    <li key={k} className="flex items-center gap-4">
+                      <Slab w={f.w} l={f.l} t={Number(f.th[f.th.length - 1]) || 12} max={max} className="h-12 w-20 shrink-0" />
+                      <SizeLabel w={f.w} l={f.l} th={f.th} />
+                    </li>
+                  );
+                })}
               </ul>
             ) : <p className="text-sm text-warm">{t('customSizes')}</p>}
             {colours.length > 0 && (
@@ -147,7 +156,7 @@ export function DetailPage({ kind }: { kind: Kind }) {
           <button onClick={() => open({ type: 'product' })} className="btn btn-dark group mt-16" data-cursor="enquire"><span>{t('requestInfo')}</span><span className="arrow">→</span></button>
         </section>
       )}
-      {r.products?.length > 0 && (
+      {kind !== 'application' && r.products?.length > 0 && (
         <section className="wrap py-24 sm:py-32">
           <div className="mb-14 flex items-end justify-between">
             <RiseText as="h2" className="h-md">{kind === 'project' ? t('materialsUsed') : t('materials')}</RiseText>
