@@ -106,3 +106,8 @@ export function switchPath(pathname: string, to: Lang) {
   const base = pathname === '/el' ? '/' : pathname.startsWith('/el/') ? pathname.slice(3) : pathname;
   return to === 'el' ? `/el${base === '/' ? '' : base}` : base;
 }
+
+// Greek is the default language. The visitor's choice is remembered once they pick EN or GR.
+const LANG_KEY = 'gm_lang';
+export function saveLang(l: Lang) { try { localStorage.setItem(LANG_KEY, l); } catch { /* ignore */ } }
+export function savedLang(): Lang | null { try { const v = localStorage.getItem(LANG_KEY); return v === 'en' || v === 'el' ? v : null; } catch { return null; } }

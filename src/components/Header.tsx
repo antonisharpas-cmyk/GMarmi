@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useLang, switchPath } from '../lib/i18n';
+import { useLang, switchPath, saveLang } from '../lib/i18n';
 import { useSite } from '../lib/site';
 import { scrollLock, scrollTopSmooth } from '../lib/motion';
 import { useEnquiry } from './EnquiryDrawer';
@@ -106,9 +106,9 @@ export default function Header() {
           </nav>
           <div className="relative z-10 flex items-center gap-5">
             <div className="hidden items-center gap-2 text-[11px] font-medium tracking-wide2 sm:flex">
-              <Link to={switchPath(pathname, 'en')} className={lang === 'en' ? '' : 'opacity-50 hover:opacity-100'} hrefLang="en">EN</Link>
+              <Link to={switchPath(pathname, 'en')} onClick={() => saveLang('en')} className={lang === 'en' ? '' : 'opacity-50 hover:opacity-100'} hrefLang="en">EN</Link>
               <span className="opacity-40">|</span>
-              <Link to={switchPath(pathname, 'el')} className={lang === 'el' ? '' : 'opacity-50 hover:opacity-100'} hrefLang="el">GR</Link>
+              <Link to={switchPath(pathname, 'el')} onClick={() => saveLang('el')} className={lang === 'el' ? '' : 'opacity-50 hover:opacity-100'} hrefLang="el">GR</Link>
             </div>
             {site?.site.instagram && (
               <a href={site.site.instagram} target="_blank" rel="noreferrer" aria-label="Instagram" className="hidden opacity-80 hover:opacity-100 md:block"><IconInstagram /></a>
@@ -161,9 +161,9 @@ export default function Header() {
             <button onClick={() => { setMenu(false); openEnquiry(); }} className="btn btn-dark w-full justify-center"><span>{t('enquire')}</span></button>
             <div className="flex items-center justify-between text-sm">
               <div className="flex gap-4">
-                <Link to={switchPath(pathname, 'en')} className={lang === 'en' ? 'font-semibold' : 'text-warm'}>EN</Link>
+                <Link to={switchPath(pathname, 'en')} onClick={() => saveLang('en')} className={lang === 'en' ? 'font-semibold' : 'text-warm'}>EN</Link>
                 <span className="text-taupe">/</span>
-                <Link to={switchPath(pathname, 'el')} className={lang === 'el' ? 'font-semibold' : 'text-warm'}>Ελληνικά</Link>
+                <Link to={switchPath(pathname, 'el')} onClick={() => saveLang('el')} className={lang === 'el' ? 'font-semibold' : 'text-warm'}>Ελληνικά</Link>
               </div>
               <div className="flex gap-4 text-warm">
                 {site?.site.instagram && <a href={site.site.instagram} target="_blank" rel="noreferrer" aria-label="Instagram"><IconInstagram className="h-5 w-5" /></a>}

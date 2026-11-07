@@ -392,7 +392,38 @@ async function batch8() {
   }
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8 };
+// Batch 9: three MY TOP Infinito 2.0 kitchen colours (images from fondovalle.it)
+async function batch9() {
+  const cat = await idOf('category', 'mytop-fondovalle');
+  const col = await idOf('collection', 'infinito-2-0');
+  const brand = await idOf('brand', 'fondovalle');
+  const kitchens = await idOf('application', 'kitchens');
+  const islands = await idOf('application', 'countertops-islands');
+  const list = [
+    ['calacatta-gold', 'Calacatta Gold', 'Natural / Honed / Polished (12 mm), Natural / Polished (20 mm)', 'Φυσικό / Honed / Γυαλιστερό (12 mm), Φυσικό / Γυαλιστερό (20 mm)', [{ t: '12', w: 163, l: 324 }, { t: '20', w: 163, l: 324 }],
+      'White Calacatta with warm golden and grey veins, a classic for kitchen walls and worktops.', 'Λευκό Calacatta με ζεστά χρυσαφένια και γκρι νερά, κλασική επιλογή για τοίχους και πάγκους κουζίνας.', 'Warm White', 'Ζεστό Λευκό', -3],
+    ['calacatta-venice', 'Calacatta Venice', 'Natural / Polished', 'Φυσικό / Γυαλιστερό', [{ t: '12', w: 163, l: 324 }],
+      'A soft ivory marble look with gentle golden veining, made for islands and full height backsplashes.', 'Απαλή ιβουάρ όψη μαρμάρου με διακριτικά χρυσαφένια νερά, για νησίδες και πλάτες σε όλο το ύψος.', 'Ivory', 'Ιβουάρ', -2],
+    ['statuario-extra', 'Statuario Extra', 'Natural / Honed / Polished (12 mm), Natural / Polished (20 mm)', 'Φυσικό / Honed / Γυαλιστερό (12 mm), Φυσικό / Γυαλιστερό (20 mm)', [{ t: '12', w: 163, l: 324 }, { t: '20', w: 163, l: 324 }],
+      'Bright white with bold grey veins, for clean and contemporary kitchens.', 'Φωτεινό λευκό με έντονα γκρι νερά, για καθαρές και σύγχρονες κουζίνες.', 'White & Grey', 'Λευκό & Γκρι', -1],
+  ];
+  for (const [slug, name, fen, fel, formats, den, del, cen, cel, sort] of list) {
+    if (await idOf('product', slug)) continue;
+    const amb = await media(`${slug}-kitchen`, `${name} kitchen by MY TOP Fondovalle`);
+    const sw = await media(`${slug}-swatch`, `${name} slab`);
+    const data = {
+      name_en: name, name_el: name, category_id: cat, collection_id: col, brand_id: brand,
+      tagline_en: den, tagline_el: del, desc_en: `${den} MY TOP Infinito 2.0 by Fondovalle.`, desc_el: `${del} MY TOP Infinito 2.0 της Fondovalle.`,
+      features_en: [], features_el: [], specs_extra: [],
+      specs: { material_en: 'Porcelain', material_el: 'Πορσελάνη', finish_en: fen, finish_el: fel, thickness: formats.map((f) => `${f.t} mm`).join(', '), dimensions: '163 x 324 cm', colour_en: cen, colour_el: cel },
+      application_ids: [kitchens, islands].filter(Boolean),
+    };
+    await q(`INSERT INTO entries (type, slug, sort_order, data, images, cover_id, published) VALUES ('product',$1,$2,$3,$4,$5,TRUE)`,
+      [slug, sort, JSON.stringify(data), JSON.stringify([amb, sw]), amb]);
+  }
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);

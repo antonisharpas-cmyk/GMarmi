@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
-import { LangProvider } from './lib/i18n';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { LangProvider, savedLang } from './lib/i18n';
 import { SiteProvider } from './lib/site';
 import { ScrollTrigger, scrollTop, startSmoothScroll, stopSmoothScroll } from './lib/motion';
 import { track } from './lib/api';
@@ -76,7 +76,7 @@ function Site() {
 }
 
 export default function App() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   if (pathname.startsWith('/admin')) {
     return (
       <Suspense fallback={<Loading />}>
@@ -84,5 +84,7 @@ export default function App() {
       </Suspense>
     );
   }
+  // the homepage opens in Greek unless the visitor chose English before
+  if (pathname === '/' && savedLang() !== 'en') return <Navigate to={`/el${search}`} replace />;
   return <Site />;
 }
