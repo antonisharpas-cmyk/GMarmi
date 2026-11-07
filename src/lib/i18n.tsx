@@ -5,7 +5,7 @@ export type Lang = 'en' | 'el';
 
 const S = {
   en: {
-    inspiration: 'Inspiration', home: 'Home', materials: 'Materials', collections: 'Collections', applications: 'Applications', projects: 'Projects',
+    inspiration: 'Inspiration', group: 'Our Group', formats: 'Formats', customSizes: 'Cut to any size, to fit your project.', materialsFor: 'Materials for this application', partners: 'Our partners', since: 'Since', founder: 'The founder', home: 'Home', materials: 'Materials', collections: 'Collections', applications: 'Applications', projects: 'Projects',
     about: 'About', contact: 'Contact', enquire: 'Enquire', faq: 'FAQ', menu: 'Menu', close: 'Close',
     explore: 'Explore', view: 'View', allMaterials: 'All materials', viewAll: 'View all', discover: 'Discover',
     exploreCollection: 'Explore the collection', requestInfo: 'Request information', requestQuote: 'Request a quote',
@@ -44,7 +44,7 @@ const S = {
     fq_materials: 'Materials', fq_products: 'Products', fq_projects: 'Projects', fq_orders: 'Orders', fq_showroom: 'Showroom', fq_general: 'General',
   },
   el: {
-    inspiration: 'Έμπνευση', home: 'Αρχική', materials: 'Υλικά', collections: 'Συλλογές', applications: 'Εφαρμογές', projects: 'Έργα',
+    inspiration: 'Έμπνευση', group: 'Ο Όμιλος', formats: 'Διαστάσεις', customSizes: 'Κοπή σε οποιαδήποτε διάσταση, ανάλογα με το έργο σας.', materialsFor: 'Υλικά για αυτή την εφαρμογή', partners: 'Οι συνεργάτες μας', since: 'Από το', founder: 'Ο ιδρυτής', home: 'Αρχική', materials: 'Υλικά', collections: 'Συλλογές', applications: 'Εφαρμογές', projects: 'Έργα',
     about: 'Η Εταιρεία', contact: 'Επικοινωνία', enquire: 'Αίτημα', faq: 'Συχνές Ερωτήσεις', menu: 'Μενού', close: 'Κλείσιμο',
     explore: 'Δείτε', view: 'Προβολή', allMaterials: 'Όλα τα υλικά', viewAll: 'Δείτε όλα', discover: 'Ανακαλύψτε',
     exploreCollection: 'Δείτε τη συλλογή', requestInfo: 'Ζητήστε πληροφορίες', requestQuote: 'Ζητήστε προσφορά',

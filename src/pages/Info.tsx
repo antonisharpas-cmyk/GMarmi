@@ -21,6 +21,7 @@ export function About() {
       <PageHero img={a.image} eyebrow={t('about')} title={tr(a, 'title')} />
       <section className="wrap grid gap-14 py-28 sm:py-40 lg:grid-cols-12">
         <div className="lg:col-span-7">
+          {a.since && <FadeUp className="mb-8 flex items-baseline gap-4"><span className="eyebrow">{t('since')}</span><span className="display text-6xl text-bronze sm:text-7xl">{a.since}</span></FadeUp>}
           <FadeUp><p className="font-display text-[28px] font-light leading-[1.4] sm:text-[40px]">{tr(a, 'intro')}</p></FadeUp>
           <div className="prose-gm mt-14 max-w-2xl">{paras.map((p, i) => <FadeUp key={i} delay={i * 0.05}><p>{p}</p></FadeUp>)}</div>
         </div>
@@ -28,10 +29,28 @@ export function About() {
           <Reveal variant="right" className="aspect-[3/4]"><Picture img={a.image_2} /></Reveal>
         </div>
       </section>
+      {tr(a, 'founder_name') && (
+        <section className="relative overflow-hidden bg-ink py-28 text-ivory sm:py-40" data-dark>
+          <div className="wrap grid gap-14 lg:grid-cols-12">
+            <div className={a.founder_image ? 'lg:col-span-4' : 'hidden'}>
+              {a.founder_image && <Reveal variant="left" className="aspect-[3/4]"><Picture img={a.founder_image} /></Reveal>}
+            </div>
+            <div className={a.founder_image ? 'lg:col-span-7 lg:col-start-6' : 'lg:col-span-10'}>
+              <div className="eyebrow mb-8 text-sand">{t('founder')}</div>
+              {tr(a, 'founder_quote') && <FadeUp><blockquote className="font-display text-[30px] font-light italic leading-[1.35] sm:text-[44px]">“{tr(a, 'founder_quote')}”</blockquote></FadeUp>}
+              <FadeUp delay={0.1} className="mt-10">
+                <div className="caps text-xl">{tr(a, 'founder_name')}</div>
+                <div className="mt-1 text-sm text-ivory/60">{tr(a, 'founder_role')}</div>
+              </FadeUp>
+              {tr(a, 'founder_bio') && <FadeUp delay={0.15}><p className="mt-10 max-w-2xl leading-[1.85] text-ivory/70">{tr(a, 'founder_bio')}</p></FadeUp>}
+            </div>
+          </div>
+        </section>
+      )}
       <section className="bg-marble py-28">
         <div className="wrap">
           <div className="eyebrow mb-12">{t('materials')}</div>
-          <div className="grid gap-px bg-charcoal/10 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-px bg-charcoal/10 sm:grid-cols-2 lg:grid-cols-3">
             {s.categories.map((c) => (
               <Link key={c.id} to={lp(`/materials/${c.slug}`)} className="group bg-marble p-8 transition-colors hover:bg-ivory" data-cursor="explore">
                 <div className="caps text-lg">{tr(c, 'name')}</div>
@@ -44,8 +63,15 @@ export function About() {
       </section>
       {s.brands.length > 0 && (
         <section className="wrap py-28">
-          <div className="eyebrow mb-10">{t('brand')}</div>
-          <div className="flex flex-wrap gap-x-16 gap-y-6">{s.brands.map((b) => <div key={b.id} className="caps text-3xl text-warm">{tr(b, 'name')}</div>)}</div>
+          <div className="eyebrow mb-10">{t('partners')}</div>
+          <div className="grid gap-px bg-charcoal/10 sm:grid-cols-2 lg:grid-cols-3">
+            {s.brands.map((b) => {
+              const inner = (<><div className="caps text-2xl">{tr(b, 'name')}</div>{tr(b, 'desc') && <p className="mt-3 text-sm leading-relaxed text-warm">{tr(b, 'desc')}</p>}{b.website && <span className="arrow mt-6 block text-sm">↗</span>}</>);
+              return b.website
+                ? <a key={b.id} href={b.website} target="_blank" rel="noreferrer" className="group block bg-ivory p-8 transition-colors hover:bg-marble">{inner}</a>
+                : <div key={b.id} className="bg-ivory p-8">{inner}</div>;
+            })}
+          </div>
         </section>
       )}
     </>

@@ -223,7 +223,141 @@ async function batch5() {
   console.log(`[seed] Staff account created: ${email} (change the password after first login)`);
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5 };
+// Batch 6: corrected company information from the client (November 2026)
+// applications (Flooring becomes Pools), material categories with formats, partners,
+// application to material mapping, About text, founder, and the owner's other companies.
+async function batch6() {
+  const setData = (id, patch) => q(`UPDATE entries SET data = json_patch(data, $2) WHERE id=$1`, [id, JSON.stringify(patch)]);
+
+  // ---- material categories, in this order ----
+  const F = (t, w, l) => ({ t, w, l });
+  const cats = [
+    { old: 'porcelain-slabs', slug: 'mytop-fondovalle', name_en: 'MY TOP by Fondovalle', name_el: 'MY TOP by Fondovalle',
+      desc_en: 'Italian ceramic surfaces in large slabs, applied as one continuous piece on countertops, islands and walls.',
+      desc_el: 'Ιταλικές κεραμικές επιφάνειες σε μεγάλες πλάκες, που εφαρμόζονται ενιαία σε πάγκους, νησίδες και τοίχους.',
+      formats: [F('6', 163, 324), F('12', 163, 324), F('20', 163, 324)] },
+    { slug: 'rak-ceramics', name_en: 'RAK Ceramics', name_el: 'RAK Ceramics',
+      desc_en: 'Maximus large format slabs by RAK Ceramics for countertops, walls, floors and furniture.',
+      desc_el: 'Πλάκες μεγάλου μεγέθους Maximus της RAK Ceramics για πάγκους, τοίχους, δάπεδα και έπιπλα.',
+      formats: [F('12', 162, 324), F('14', 144, 305), F('6, 9', 120, 280), F('9', 162, 162), F('9, 12', 120, 120), F('9, 14, 20', 60, 120)],
+      admin_note: 'Formats taken from the RAK Maximus website (maximussurfaces.com). Confirm which sizes and thicknesses GM Andreou Marmi stocks.' },
+    { slug: 'porcelanato', name_en: 'Porcelanato', name_el: 'Porcelanato',
+      desc_en: 'Porcelain slabs in large formats and thicknesses from 15 to 20 mm, for floors, stairs and surfaces.',
+      desc_el: 'Πλάκες πορσελάνης σε μεγάλες διαστάσεις και πάχη από 15 έως 20 mm, για δάπεδα, σκάλες και επιφάνειες.',
+      formats: [F('15', 120, 240), F('18', 120, 240), F('18', 120, 320), F('20', 140, 305), F('20', 126, 180.5)] },
+    { old: 'engineered-quartz', slug: 'quartz', name_en: 'Quartz', name_el: 'Χαλαζίας',
+      desc_en: 'Engineered quartz with consistent colour and clean lines for kitchens and bathrooms.',
+      desc_el: 'Τεχνητός χαλαζίας με ομοιόμορφο χρώμα και καθαρές γραμμές για κουζίνες και μπάνια.',
+      formats: [F('20', 160, 320)] },
+    { old: 'marble', slug: 'natural-marble', name_en: 'Natural Marble', name_el: 'Φυσικά Μάρμαρα',
+      desc_en: 'Natural marble with unique veining, cut to the size of your project.',
+      desc_el: 'Φυσικό μάρμαρο με μοναδικά νερά, κομμένο στις διαστάσεις του έργου σας.',
+      formats: [], custom: true },
+    { old: 'granite', slug: 'natural-granite', name_en: 'Natural Granite', name_el: 'Φυσικοί Γρανίτες',
+      desc_en: 'Natural granite, strong and deep in colour, cut to the size of your project.',
+      desc_el: 'Φυσικός γρανίτης, ανθεκτικός και με βάθος χρώματος, κομμένος στις διαστάσεις του έργου σας.',
+      formats: [], custom: true },
+  ];
+  const C = {};
+  let order = 1;
+  for (const c of cats) {
+    let id = (c.old && (await idOf('category', c.old))) || (await idOf('category', c.slug));
+    const data = { name_en: c.name_en, name_el: c.name_el, desc_en: c.desc_en, desc_el: c.desc_el, formats: c.formats, custom_sizes: !!c.custom, admin_note: c.admin_note || (c.custom || c.slug === 'porcelanato' || c.slug === 'rak-ceramics' || c.slug === 'quartz' ? 'Photos for this category required from client.' : '') };
+    if (id) {
+      await setData(id, data);
+      await q(`UPDATE entries SET slug=$2, sort_order=$3, published=TRUE WHERE id=$1`, [id, c.slug, order]);
+    } else {
+      id = (await one(`INSERT INTO entries (type, slug, sort_order, data, images, published) VALUES ('category',$1,$2,$3,'[]',TRUE) RETURNING id`, [c.slug, order, JSON.stringify(data)])).id;
+    }
+    C[c.slug] = id; order++;
+  }
+
+  // ---- applications: Flooring becomes Pools; materials per application ----
+  const flooring = await idOf('application', 'flooring');
+  if (flooring && !(await idOf('application', 'pools'))) {
+    await setData(flooring, { name_en: 'Pools', name_el: 'Πισίνες',
+      desc_en: 'Surfaces around and inside the pool, chosen for comfort, safety and durability.',
+      desc_el: 'Επιφάνειες γύρω και μέσα στην πισίνα, επιλεγμένες για άνεση, ασφάλεια και αντοχή.',
+      product_ids: [], admin_note: 'Pool photos and the materials used for pools are required from client.' });
+    await q(`UPDATE entries SET slug='pools', images='[]', cover_id=NULL WHERE id=$1`, [flooring]);
+    // the flooring products are not pool products
+    for (const p of await q(`SELECT id, data FROM entries WHERE type='product'`)) {
+      const ids = (p.data.application_ids || []).filter((x) => x !== flooring);
+      if (ids.length !== (p.data.application_ids || []).length) await setData(p.id, { application_ids: ids });
+    }
+  }
+  const main = [C['mytop-fondovalle'], C['rak-ceramics'], C.quartz, C['natural-granite']];
+  const map = {
+    kitchens: main, bathrooms: main, 'countertops-islands': main, hospitality: main,
+    'wall-cladding': [C['mytop-fondovalle'], C['rak-ceramics']],
+    staircases: [C['mytop-fondovalle'], C['rak-ceramics'], C.porcelanato, C.quartz, C['natural-marble'], C['natural-granite']],
+    pools: [],
+  };
+  const appOrder = ['kitchens', 'bathrooms', 'countertops-islands', 'wall-cladding', 'staircases', 'hospitality', 'pools'];
+  for (let i = 0; i < appOrder.length; i++) {
+    const id = await idOf('application', appOrder[i]);
+    if (!id) continue;
+    await setData(id, { category_ids: map[appOrder[i]] });
+    await q(`UPDATE entries SET sort_order=$2 WHERE id=$1`, [id, i + 1]);
+  }
+
+  // ---- partners (brands) ----
+  const partners = [
+    ['fondovalle', 'Fondovalle', 'https://fondovalle.it/', 'Italian porcelain surfaces, maker of MY TOP.', 'Ιταλικές πορσελάνινες επιφάνειες, δημιουργός των MY TOP.'],
+    ['quarella', 'Quarella', 'https://www.quarella.com/', 'Italian quartz and marble surfaces.', 'Ιταλικές επιφάνειες χαλαζία και μαρμάρου.'],
+    ['rak-ceramics', 'RAK Ceramics', 'https://www.rakceramics.com/en/', 'Ceramic surfaces and Maximus large slabs.', 'Κεραμικές επιφάνειες και μεγάλες πλάκες Maximus.'],
+    ['sachanas-marble', 'Sachanas Marble', 'https://marblesachanas.gr', 'Greek natural marble.', 'Ελληνικά φυσικά μάρμαρα.'],
+    ['rekalis-marble', 'Rekalis Marble', 'https://rekalis.gr/en/', 'Greek natural marble.', 'Ελληνικά φυσικά μάρμαρα.'],
+    ['solomonidis-marbles', 'Solomonidis Marbles', 'https://instagram.com/solomonidi_marbles', 'Marble, granite and quartz.', 'Μάρμαρα, γρανίτες και χαλαζίας.'],
+  ];
+  let bo = 1;
+  for (const [slug, name, url, den, del] of partners) {
+    const data = { name_en: name, name_el: name, website: url, desc_en: den, desc_el: del };
+    const id = await idOf('brand', slug);
+    if (id) { await setData(id, data); await q(`UPDATE entries SET sort_order=$2 WHERE id=$1`, [id, bo]); }
+    else await q(`INSERT INTO entries (type, slug, sort_order, data, published) VALUES ('brand',$1,$2,$3,TRUE)`, [slug, bo, JSON.stringify(data)]);
+    bo++;
+  }
+
+  // ---- About, founder, group companies, homepage "why" ----
+  const patchSetting = async (key, patch) => {
+    const cur = (await one(`SELECT value FROM settings WHERE key=$1`, [key]))?.value || {};
+    await q(`INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`, [key, JSON.stringify({ ...cur, ...patch })]);
+  };
+  await patchSetting('about', {
+    intro_en: 'Since 2002, G. M. Andreou Marmi Ltd has supplied natural marble, natural granite, quartz and large ceramic and porcelain slabs from Larnaca, Cyprus, to homeowners and to professionals alike.',
+    intro_el: 'Από το 2002, η G. M. Andreou Marmi Ltd προμηθεύει από τη Λάρνακα φυσικά μάρμαρα, φυσικούς γρανίτες, χαλαζία και μεγάλες κεραμικές και πορσελάνινες πλάκες, τόσο σε ιδιώτες όσο και σε επαγγελματίες.',
+    body_en: 'We work with homeowners, architects, designers, contractors and developers, on single kitchens and on complete buildings.\n\nOur materials come from partners we trust in Italy, Greece and beyond, including Fondovalle, Quarella, RAK Ceramics, Sachanas Marble, Rekalis Marble and Solomonidis Marbles.\n\nVisit our showroom in the Livadia Industrial Area, Larnaca, to see the materials in person.',
+    body_el: 'Συνεργαζόμαστε με ιδιώτες, αρχιτέκτονες, σχεδιαστές, εργολάβους και αναπτυξιακές εταιρείες, από μία κουζίνα μέχρι ολόκληρα κτήρια.\n\nΤα υλικά μας προέρχονται από συνεργάτες που εμπιστευόμαστε στην Ιταλία, την Ελλάδα και αλλού, όπως οι Fondovalle, Quarella, RAK Ceramics, Sachanas Marble, Rekalis Marble και Solomonidis Marbles.\n\nΕπισκεφθείτε τον εκθεσιακό μας χώρο στη Βιομηχανική Περιοχή Λιβαδιών, στη Λάρνακα, για να δείτε τα υλικά από κοντά.',
+    since: '2002',
+    founder_name_en: 'Marios Andreou', founder_name_el: 'Μάριος Ανδρέου',
+    founder_role_en: 'Visionary, Founder and Director', founder_role_el: 'Οραματιστής, Ιδρυτής και Διευθυντής',
+    founder_bio_en: 'With more than 25 years of experience in marble and construction, Marios Andreou never stops dreaming and innovating. As the person behind G.M. Andreou Marmi Ltd, G.M. Marmi Properties, G.M. Respect Developers Ltd, M.D. Dynamic Properties Ltd, Coffee Magek Ltd and Cafe Route 66 Larnaca, he leads with a passion for quality, for creating unique spaces and for serving customers with professionalism.',
+    founder_bio_el: 'Με περισσότερα από 25 χρόνια εμπειρίας στον χώρο του μαρμάρου και των κατασκευών, ο Μάριος Ανδρέου δεν σταματά να ονειρεύεται και να καινοτομεί. Ως ο άνθρωπος πίσω από τις εταιρείες G.M. Andreou Marmi LTD, G.M. Marmi Properties, G.M. Respect Developers Ltd, M.D. Dynamic Properties Ltd, Coffee Magek Ltd και Cafe Route 66 Larnaca, καθοδηγεί με πάθος για την ποιότητα, τη δημιουργία μοναδικών χώρων και την εξυπηρέτηση των πελατών με επαγγελματισμό.',
+    founder_quote_en: 'For me, every project is personal. I want to see our creations come to life and become part of people’s everyday lives.',
+    founder_quote_el: 'Για εμένα, κάθε έργο είναι προσωπικό. Θέλω να βλέπω τις δημιουργίες μας να ζωντανεύουν και να γίνονται μέρος της καθημερινότητας των ανθρώπων.',
+    founder_image: null,
+  });
+  await patchSetting('site', {
+    group_companies: [
+      { name: 'G.M. Marmi Properties', url: '' },
+      { name: 'G.M. Respect Developers Ltd', url: '' },
+      { name: 'M.D. Dynamic Properties Ltd', url: '' },
+      { name: 'Coffee Magek Ltd', url: '' },
+      { name: 'Cafe Route 66 Larnaca', url: '' },
+      { name: 'APEX Fitness Centre', url: 'https://www.apexfitnesscentrecy.com' },
+    ],
+  });
+  const home = (await one(`SELECT value FROM settings WHERE key='home'`))?.value || {};
+  const why = [...(home.why || [])];
+  why.unshift({ t_en: 'Since 2002', t_el: 'Από το 2002', d_en: 'More than two decades supplying marble and surfaces in Cyprus.', d_el: 'Πάνω από δύο δεκαετίες στην προμήθεια μαρμάρων και επιφανειών στην Κύπρο.' });
+  const forAll = { t_en: 'For homes and professionals', t_el: 'Για ιδιώτες και επαγγελματίες', d_en: 'We work with homeowners, architects, contractors and developers.', d_el: 'Συνεργαζόμαστε με ιδιώτες, αρχιτέκτονες, εργολάβους και αναπτυξιακές εταιρείες.' };
+  // keep four points: Since 2002, Exclusive materials, For homes and professionals, See it in person
+  const pick = (t) => why.find((w) => w.t_en === t);
+  await patchSetting('home', { why: [why[0], pick('Exclusive materials'), forAll, pick('See it in person')].filter(Boolean) });
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);

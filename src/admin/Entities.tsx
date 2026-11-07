@@ -5,7 +5,7 @@ import type { Img } from '../lib/types';
 import { Area, Badge, Btn, Card, Field, Input, PageHead, Sel, Toggle, useLoad, useToast } from './common';
 import { ImageManager, SingleImage } from './Media';
 
-type F = { k: string; label: string; type: 'text' | 'area' | 'rel' | 'multi' | 'bool' | 'lines' | 'kv' | 'choice'; rel?: string; choices?: string[]; bi?: boolean; hint?: string; wide?: boolean };
+type F = { k: string; label: string; type: 'text' | 'area' | 'rel' | 'multi' | 'bool' | 'lines' | 'kv' | 'choice' | 'formats'; rel?: string; choices?: string[]; bi?: boolean; hint?: string; wide?: boolean };
 
 export const TYPES: Record<string, { label: string; plural: string; publicPath?: (e: any, opts: any[]) => string; images: boolean; fields: F[] }> = {
   product: {
@@ -30,7 +30,9 @@ export const TYPES: Record<string, { label: string; plural: string; publicPath?:
     ],
   },
   category: { label: 'Category', plural: 'Categories', images: true, publicPath: (e) => `/materials/${e.slug}`,
-    fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true }] },
+    fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true },
+      { k: 'formats', label: 'Sizes (shown on the category page with a drawing of each slab)', type: 'formats', wide: true },
+      { k: 'custom_sizes', label: 'Cut to any size (shows "Cut to any size" when no sizes are listed)', type: 'bool', wide: true }] },
   collection: { label: 'Collection', plural: 'Collections', images: true, publicPath: (e) => `/collections/${e.slug}`,
     fields: [
       { k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'tagline', label: 'Tagline', type: 'text', bi: true, wide: true },
@@ -39,7 +41,8 @@ export const TYPES: Record<string, { label: string; plural: string; publicPath?:
     ] },
   application: { label: 'Application', plural: 'Applications', images: true, publicPath: (e) => `/applications/${e.slug}`,
     fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true },
-      { k: 'body', label: 'Extra text', type: 'area', bi: true, wide: true }, { k: 'product_ids', label: 'Materials', type: 'multi', rel: 'product', wide: true }] },
+      { k: 'body', label: 'Extra text', type: 'area', bi: true, wide: true }, { k: 'category_ids', label: 'Material categories for this application', type: 'multi', rel: 'category', wide: true },
+      { k: 'product_ids', label: 'Materials', type: 'multi', rel: 'product', wide: true }] },
   project: { label: 'Project', plural: 'Projects', images: true, publicPath: (e) => `/projects/${e.slug}`,
     fields: [
       { k: 'name', label: 'Title', type: 'text', bi: true }, { k: 'location', label: 'Location', type: 'text', bi: true },
@@ -154,6 +157,24 @@ export function EntityEdit() {
               return <button type="button" key={o.id} onClick={() => setData(key, on ? arr.filter((x) => x !== o.id) : [...arr, o.id])}
                 className={`border px-3 py-1.5 text-xs ${on ? 'border-charcoal bg-charcoal text-ivory' : 'border-charcoal/15 hover:border-charcoal'}`}>{o.name || o.slug}</button>;
             })}
+          </div>
+        );
+      }
+      case 'formats': {
+        const arr: { t: string; w: number; l: number }[] = v || [];
+        const upd2 = (i: number, k: string, val: any) => setData(key, arr.map((r, j) => (j === i ? { ...r, [k]: val } : r)));
+        return (
+          <div className="space-y-2">
+            <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 text-[10px] uppercase tracking-wide2 text-warm"><span>Thickness mm (e.g. 12 or 6, 12)</span><span>Width cm</span><span>Length cm</span><span /></div>
+            {arr.map((row, i) => (
+              <div key={i} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2">
+                <Input value={row.t ?? ''} onChange={(ev) => upd2(i, 't', ev.target.value)} />
+                <Input type="number" step="0.5" value={row.w ?? ''} onChange={(ev) => upd2(i, 'w', Number(ev.target.value))} />
+                <Input type="number" step="0.5" value={row.l ?? ''} onChange={(ev) => upd2(i, 'l', Number(ev.target.value))} />
+                <Btn type="button" kind="ghost" onClick={() => setData(key, arr.filter((_, j) => j !== i))}>✕</Btn>
+              </div>
+            ))}
+            <Btn type="button" kind="line" onClick={() => setData(key, [...arr, { t: '', w: 0, l: 0 }])}>＋ Add size</Btn>
           </div>
         );
       }

@@ -95,6 +95,8 @@ r.get('/entries/:type/:slug', async (req, res) => {
   }
   if (type === 'brand') related.products = products.filter((p) => p.brand_id === item.id);
   if (type === 'application') {
+    const cats = await listType('category');
+    related.categories = (item.category_ids || []).map((id) => cats.find((c) => c.id === id)).filter(Boolean);
     related.products = products.filter((p) => (item.product_ids || []).includes(p.id) || (p.application_ids || []).includes(item.id));
     related.projects = (await listType('project')).filter((p) => (p.application_ids || []).includes(item.id));
   }

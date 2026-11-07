@@ -99,6 +99,14 @@ export function DetailPage({ kind }: { kind: Kind }) {
         </section>
       )}
 
+      {r.categories?.length > 0 && (
+        <section className="wrap py-24 sm:py-32">
+          <RiseText as="h2" className="h-md mb-14">{t('materialsFor')}</RiseText>
+          <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+            {r.categories.map((c: Entry, i: number) => <Tile key={c.id} e={c} i={i} to={lp(`/materials/${c.slug}`)} aspect="aspect-[4/3]" />)}
+          </div>
+        </section>
+      )}
       {r.products?.length > 0 && (
         <section className="wrap py-24 sm:py-32">
           <div className="mb-14 flex items-end justify-between">

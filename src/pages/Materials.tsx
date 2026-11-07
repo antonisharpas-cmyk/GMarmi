@@ -8,6 +8,7 @@ import Select from '../components/Select';
 import { FadeUp } from '../components/Reveal';
 import { useEnquiry } from '../components/EnquiryDrawer';
 import type { Entry } from '../lib/types';
+import SlabFormats from '../components/SlabFormats';
 
 export default function Materials() {
   const { cat } = useParams();
@@ -60,7 +61,10 @@ export default function Materials() {
   return (
     <>
       {category ? (
-        <PageHero img={category.cover} eyebrow={t('materials')} title={tr(category, 'name')} intro={tr(category, 'desc')} />
+        <>
+          <PageHero img={category.cover} eyebrow={t('materials')} title={tr(category, 'name')} intro={tr(category, 'desc')} />
+          <SlabFormats formats={category.formats || []} custom={category.custom_sizes} />
+        </>
       ) : (
         <PageTitle eyebrow={t('materials')} title={lang === 'el' ? 'Η συλλογή υλικών' : 'The material collection'} intro={tr(s.seo, 'desc')} />
       )}

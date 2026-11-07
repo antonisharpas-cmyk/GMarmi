@@ -5,7 +5,7 @@ import type { Img } from '../lib/types';
 import { Area, Btn, Card, Field, Input, PageHead, Sel, Toggle, useLoad, useToast } from './common';
 import { ImageManager, SingleImage } from './Media';
 
-type S = { k: string; label: string; t: 'text' | 'area' | 'img' | 'imgs' | 'lines' | 'bool' | 'rel' | 'multi' | 'why' | 'sections'; bi?: boolean; rel?: string; hint?: string; rows?: number };
+type S = { k: string; label: string; t: 'text' | 'area' | 'img' | 'imgs' | 'lines' | 'bool' | 'rel' | 'multi' | 'why' | 'sections' | 'links'; bi?: boolean; rel?: string; hint?: string; rows?: number };
 
 type G = { title: string; fields: S[]; section?: string; note?: { text: string; to: string; label: string } };
 const TABS: Record<string, { title: string; key: string; groups: G[] }> = {
@@ -25,11 +25,13 @@ const TABS: Record<string, { title: string; key: string; groups: G[] }> = {
   site: { title: 'Contact, social and footer', key: 'site', groups: [
     { title: 'Contact', fields: [{ k: 'phone', label: 'Phone (display)', t: 'text' }, { k: 'phone_raw', label: 'Phone (for dialling, no spaces)', t: 'text' }, { k: 'email', label: 'Email', t: 'text' }, { k: 'address', label: 'Address', t: 'text', bi: true }, { k: 'hours', label: 'Opening hours', t: 'area', bi: true, hint: 'Hidden on the website while empty' }, { k: 'map_query', label: 'Google Maps search text', t: 'text' }, { k: 'contact_image', label: 'Contact page background image', t: 'img' }] },
     { title: 'Social', fields: [{ k: 'instagram', label: 'Instagram URL', t: 'text' }, { k: 'facebook', label: 'Facebook URL', t: 'text' }, { k: 'linkedin', label: 'LinkedIn URL', t: 'text' }, { k: 'whatsapp', label: 'WhatsApp number (future use)', t: 'text' }] },
+    { title: 'Our Group (menu)', fields: [{ k: 'group_companies', label: 'Companies shown under "Our Group" in the menu. Leave the website empty if a company has none.', t: 'links' }] },
     { title: 'Live chat', fields: [{ k: 'chat_online', label: 'Team online for live chat (off = "Leave us a message", saved as an enquiry)', t: 'bool' }] },
     { title: 'Footer', fields: [{ k: 'company', label: 'Company name', t: 'text' }, { k: 'footer', label: 'Footer line', t: 'text', bi: true }] },
   ] },
   about: { title: 'About page', key: 'about', groups: [
-    { title: 'About', fields: [{ k: 'image', label: 'Hero image', t: 'img' }, { k: 'image_2', label: 'Second image', t: 'img' }, { k: 'title', label: 'Title', t: 'text', bi: true }, { k: 'intro', label: 'Introduction', t: 'area', bi: true }, { k: 'body', label: 'Story (blank line between paragraphs)', t: 'area', bi: true, rows: 12 }] },
+    { title: 'About', fields: [{ k: 'image', label: 'Hero image', t: 'img' }, { k: 'image_2', label: 'Second image', t: 'img' }, { k: 'title', label: 'Title', t: 'text', bi: true }, { k: 'intro', label: 'Introduction', t: 'area', bi: true }, { k: 'since', label: 'Founded (year)', t: 'text' }, { k: 'body', label: 'Story (blank line between paragraphs)', t: 'area', bi: true, rows: 12 }] },
+    { title: 'Founder', fields: [{ k: 'founder_name', label: 'Name', t: 'text', bi: true }, { k: 'founder_role', label: 'Role', t: 'text', bi: true }, { k: 'founder_quote', label: 'Quote', t: 'area', bi: true }, { k: 'founder_bio', label: 'About the founder', t: 'area', bi: true, rows: 6 }, { k: 'founder_image', label: 'Photo (optional)', t: 'img' }] },
   ] },
   legal: { title: 'Legal pages', key: 'legal', groups: [
     { title: 'Privacy Policy', fields: [{ k: 'privacy', label: 'Text', t: 'area', bi: true, rows: 14 }] },
@@ -74,6 +76,22 @@ export default function Content() {
             <div className="mb-3 flex flex-wrap gap-2">{arr.map((id, i) => <span key={id} className="inline-flex items-center gap-2 bg-charcoal px-3 py-1.5 text-xs text-ivory">{i + 1}. {all.find((o) => o.id === id)?.name}
               <button onClick={() => put(key, arr.filter((x) => x !== id))}>✕</button></span>)}</div>
             <Sel value="" onChange={(e) => e.target.value && put(key, [...arr, Number(e.target.value)])} options={[{ value: '', label: '＋ Add' }, ...all.filter((o) => !arr.includes(o.id)).map((o) => ({ value: o.id, label: o.name }))]} />
+          </div>
+        );
+      }
+      case 'links': {
+        const arr: { name: string; url: string }[] = val || [];
+        const set2 = (i: number, k: string, x: string) => put(key, arr.map((r, j) => (j === i ? { ...r, [k]: x } : r)));
+        return (
+          <div className="space-y-2">
+            {arr.map((r, i) => (
+              <div key={i} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                <Input placeholder="Company name" value={r.name || ''} onChange={(e) => set2(i, 'name', e.target.value)} />
+                <Input placeholder="Website (optional), e.g. https://www.example.com" value={r.url || ''} onChange={(e) => set2(i, 'url', e.target.value)} />
+                <Btn kind="ghost" onClick={() => put(key, arr.filter((_, j) => j !== i))}>✕</Btn>
+              </div>
+            ))}
+            <Btn kind="line" onClick={() => put(key, [...arr, { name: '', url: '' }])}>＋ Add company</Btn>
           </div>
         );
       }
@@ -135,7 +153,7 @@ export default function Content() {
             action={sec && !sec.visible ? <span className="text-[10px] uppercase tracking-wide2 text-taupe">Hidden on website</span> : undefined}>
             {g.note && <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-warm"><span>{g.note.text}</span><Link to={g.note.to} className="text-[11px] uppercase tracking-wide2 text-charcoal underline underline-offset-4">{g.note.label} →</Link></div>}
             <div className="grid gap-5 md:grid-cols-2">
-              {g.fields.map((f) => <Field key={f.k} label={f.label ? `${f.label}${f.bi ? ` (${lang.toUpperCase()})` : ''}` : ''} hint={f.hint} className={['area', 'imgs', 'why', 'sections', 'multi'].includes(f.t) ? 'md:col-span-2' : ''}>{render(f)}</Field>)}
+              {g.fields.map((f) => <Field key={f.k} label={f.label ? `${f.label}${f.bi ? ` (${lang.toUpperCase()})` : ''}` : ''} hint={f.hint} className={['area', 'imgs', 'why', 'sections', 'multi', 'links'].includes(f.t) ? 'md:col-span-2' : ''}>{render(f)}</Field>)}
             </div>
           </Card>
           );
