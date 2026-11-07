@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLang } from '../lib/i18n';
-import { useApi, useSite } from '../lib/site';
+import { useApi, useSite, productPath } from '../lib/site';
 import { Picture, Reveal, RiseText, FadeUp } from '../components/Reveal';
 import { Lightbox, Loading, NotFoundBlock, PageHero, PageTitle, ProductGrid, Tile, useTitle, variantAt } from '../components/ui';
 import { useEnquiry } from '../components/EnquiryDrawer';
@@ -48,6 +48,45 @@ export function ListPage({ kind }: { kind: Kind }) {
   );
 }
 
+/** Category tile; on desktop hover a card shows its sizes and the colours available for this application */
+function CategoryCard({ c, i }: { c: Entry; i: number }) {
+  const { t, tr, lp } = useLang();
+  const s = useSite();
+  const formats: { t: string; w: number; l: number }[] = c.formats || [];
+  const colours: Entry[] = c.colours || [];
+  return (
+    <div className="group/cat relative">
+      <Tile e={c} i={i} to={lp(`/materials/${c.slug}`)} aspect="aspect-[4/3]" />
+      {(formats.length > 0 || colours.length > 0 || c.custom_sizes) && (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 hidden translate-y-2 opacity-0 transition-all duration-500 ease-lux group-hover/cat:pointer-events-auto group-hover/cat:translate-y-0 group-hover/cat:opacity-100 md:block">
+          <div className="max-h-[440px] overflow-y-auto border border-charcoal/10 bg-ivory p-6 shadow-[0_30px_70px_rgba(29,27,25,.18)]" data-lenis-prevent>
+            <Link to={lp(`/materials/${c.slug}`)} className="font-display text-2xl">{tr(c, 'name')}</Link>
+            <div className="eyebrow mb-2 mt-5">{t('formats')}</div>
+            {formats.length ? (
+              <ul className="space-y-1 text-sm">
+                {formats.map((f, k) => <li key={k} className="flex justify-between gap-4"><span>{f.w} × {f.l} cm</span><span className="text-warm">{String(f.t).split(',').map((x) => `${x.trim()} mm`).join(' · ')}</span></li>)}
+              </ul>
+            ) : <p className="text-sm text-warm">{t('customSizes')}</p>}
+            {colours.length > 0 && (
+              <>
+                <div className="eyebrow mb-3 mt-6">{t('colours')}</div>
+                <div className="grid grid-cols-3 gap-3">
+                  {colours.map((p) => (
+                    <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} className="block">
+                      <div className="aspect-square overflow-hidden bg-stone">{p.cover && <img src={p.cover.sm} alt="" className="h-full w-full object-cover" loading="lazy" />}</div>
+                      <div className="mt-1.5 truncate text-[11px]">{tr(p, 'name')}</div>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DetailPage({ kind }: { kind: Kind }) {
   const { slug } = useParams();
   const { t, tr, lp } = useLang();
@@ -66,7 +105,7 @@ export function DetailPage({ kind }: { kind: Kind }) {
     <>
       <PageHero img={e.cover} eyebrow={eyebrow} title={tr(e, 'name')} intro={tr(e, 'tagline') || tr(e, 'desc')} />
 
-      <section className="wrap grid gap-14 py-24 sm:py-32 lg:grid-cols-12">
+      {kind !== 'application' && <section className="wrap grid gap-14 py-24 sm:py-32 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <div className="eyebrow">{t('overview')}</div>
           {r.brand && <div className="mt-6 text-sm text-warm">{t('brand')}: <span className="text-charcoal">{tr(r.brand, 'name')}</span></div>}
@@ -84,7 +123,7 @@ export function DetailPage({ kind }: { kind: Kind }) {
             <span>{kind === 'project' ? t('enquireMaterial') : t('requestInfo')}</span><span className="arrow">→</span>
           </button>
         </div>
-      </section>
+      </section>}
 
       {gallery.length > 1 && (
         <section className="bg-marble py-24 sm:py-32">
@@ -103,8 +142,9 @@ export function DetailPage({ kind }: { kind: Kind }) {
         <section className="wrap py-24 sm:py-32">
           <RiseText as="h2" className="h-md mb-14">{t('materialsFor')}</RiseText>
           <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-            {r.categories.map((c: Entry, i: number) => <Tile key={c.id} e={c} i={i} to={lp(`/materials/${c.slug}`)} aspect="aspect-[4/3]" />)}
+            {r.categories.map((c: Entry, i: number) => <CategoryCard key={c.id} c={c} i={i} />)}
           </div>
+          <button onClick={() => open({ type: 'product' })} className="btn btn-dark group mt-16" data-cursor="enquire"><span>{t('requestInfo')}</span><span className="arrow">→</span></button>
         </section>
       )}
       {r.products?.length > 0 && (

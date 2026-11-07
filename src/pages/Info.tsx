@@ -47,26 +47,12 @@ export function About() {
           </div>
         </section>
       )}
-      <section className="bg-marble py-28">
-        <div className="wrap">
-          <div className="eyebrow mb-12">{t('materials')}</div>
-          <div className="grid gap-px bg-charcoal/10 sm:grid-cols-2 lg:grid-cols-3">
-            {s.categories.map((c) => (
-              <Link key={c.id} to={lp(`/materials/${c.slug}`)} className="group bg-marble p-8 transition-colors hover:bg-ivory" data-cursor="explore">
-                <div className="caps text-lg">{tr(c, 'name')}</div>
-                <p className="mt-4 text-sm leading-relaxed text-warm">{tr(c, 'desc')}</p>
-                <span className="arrow mt-8 block">→</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
       {s.brands.length > 0 && (
         <section className="wrap py-28">
           <div className="eyebrow mb-10">{t('partners')}</div>
           <div className="grid gap-px bg-charcoal/10 sm:grid-cols-2 lg:grid-cols-3">
             {s.brands.map((b) => {
-              const inner = (<><div className="caps text-2xl">{tr(b, 'name')}</div>{tr(b, 'desc') && <p className="mt-3 text-sm leading-relaxed text-warm">{tr(b, 'desc')}</p>}{b.website && <span className="arrow mt-6 block text-sm">↗</span>}</>);
+              const inner = (<>{b.cover ? <img src={b.cover.md} alt={tr(b, 'name')} className="mb-5 h-14 w-auto max-w-[180px] object-contain" loading="lazy" /> : null}<div className="caps text-2xl">{tr(b, 'name')}</div>{tr(b, 'desc') && <p className="mt-3 text-sm leading-relaxed text-warm">{tr(b, 'desc')}</p>}{b.website && <span className="arrow mt-6 block text-sm">↗</span>}</>);
               return b.website
                 ? <a key={b.id} href={b.website} target="_blank" rel="noreferrer" className="group block bg-ivory p-8 transition-colors hover:bg-marble">{inner}</a>
                 : <div key={b.id} className="bg-ivory p-8">{inner}</div>;
@@ -74,6 +60,27 @@ export function About() {
           </div>
         </section>
       )}
+    </>
+  );
+}
+
+export function Group() {
+  const s = useSite();
+  const { t, tr } = useLang();
+  useTitle(t('group'));
+  if (!s) return <Loading />;
+  const links = ((s.site.group_companies || []) as { name: string; url: string }[]).filter((c) => c.name && c.url);
+  return (
+    <>
+      <PageTitle eyebrow={t('group')} title={t('groupTitle')} />
+      <section className="wrap pb-32">
+        <FadeUp><p className="max-w-3xl font-display text-[26px] font-light leading-[1.5] sm:text-[34px]">{tr(s.site, 'group_text')}</p></FadeUp>
+        {links.length > 0 && (
+          <div className="mt-14 flex flex-wrap gap-4">
+            {links.map((c) => <a key={c.url} href={c.url} target="_blank" rel="noreferrer" className="btn btn-line group"><span>{c.name}</span><span className="arrow">↗</span></a>)}
+          </div>
+        )}
+      </section>
     </>
   );
 }

@@ -14,7 +14,7 @@ import Home from './pages/Home';
 import Materials from './pages/Materials';
 import Product from './pages/Product';
 import { DetailPage, ListPage } from './pages/Sections';
-import { About, Contact, Faq, Legal, LinkPage } from './pages/Info';
+import { About, Contact, Faq, Group, Legal, LinkPage } from './pages/Info';
 
 const Admin = lazy(() => import('./admin/Admin'));
 
@@ -32,6 +32,7 @@ function PublicRoutes() {
       <Route path="projects" element={<ListPage kind="project" />} />
       <Route path="projects/:slug" element={<DetailPage kind="project" />} />
       <Route path="about" element={<About />} />
+      <Route path="group" element={<Group />} />
       <Route path="contact" element={<Contact />} />
       <Route path="faq" element={<Faq />} />
       <Route path="privacy" element={<Legal k="privacy" />} />

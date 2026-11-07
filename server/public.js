@@ -96,7 +96,14 @@ r.get('/entries/:type/:slug', async (req, res) => {
   if (type === 'brand') related.products = products.filter((p) => p.brand_id === item.id);
   if (type === 'application') {
     const cats = await listType('category');
-    related.categories = (item.category_ids || []).map((id) => cats.find((c) => c.id === id)).filter(Boolean);
+    const linked = products.filter((p) => (item.product_ids || []).includes(p.id) || (p.application_ids || []).includes(item.id));
+    related.categories = (item.category_ids || []).map((id) => cats.find((c) => c.id === id)).filter(Boolean).map((c) => {
+      // colours shown in the hover card: those linked to this application, otherwise the whole category
+      const inCat = products.filter((p) => p.category_id === c.id);
+      const mine = inCat.filter((p) => linked.some((l) => l.id === p.id));
+      const list = mine.length ? mine : inCat;
+      return { ...c, colours: list.map((p) => ({ id: p.id, slug: p.slug, name_en: p.name_en, name_el: p.name_el, cover: p.cover })) };
+    });
     related.products = products.filter((p) => (item.product_ids || []).includes(p.id) || (p.application_ids || []).includes(item.id));
     related.projects = (await listType('project')).filter((p) => (p.application_ids || []).includes(item.id));
   }

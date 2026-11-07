@@ -59,11 +59,10 @@ export default function Header() {
   type Item = { to: string; label: string; external?: boolean };
   const groups: Record<string, { label: string; items: Item[] }> = {
     inspo: { label: t('inspiration'), items: [{ to: '/applications', label: t('applications') }, { to: '/projects', label: t('projects') }] },
-    group: { label: t('group'), items: ((site?.site.group_companies || []) as { name: string; url: string }[]).filter((c) => c.name).map((c) => ({ to: c.url || '', label: c.name, external: true })) },
   };
-  const nav: (readonly [string, string] | 'inspo' | 'group')[] = [
+  const nav: (readonly [string, string] | 'inspo')[] = [
     ['/', t('home')], ['/materials', t('materials')], ['/collections', t('collections')], 'inspo',
-    ['/about', t('about')], ['/contact', t('contact')], ...(groups.group.items.length ? (['group'] as const) : []),
+    ['/about', t('about')], ['/contact', t('contact')], ['/group', t('group')],
   ];
   const isActive = (k: string) => groups[k].items.some((it) => !it.external && (base === it.to || base.startsWith(it.to + '/')));
 
@@ -85,7 +84,7 @@ export default function Header() {
                   {groups[item].label}
                   <svg className={`h-2.5 w-2.5 transition-transform duration-300 ${drop === item ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="M2 4l4 4 4-4" /></svg>
                 </button>
-                <div className={`absolute top-full pt-5 transition-all duration-300 ${item === 'group' ? 'right-0' : 'left-1/2 -translate-x-1/2'} ${drop === item ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-1 opacity-0'}`}>
+                <div className={`absolute top-full pt-5 transition-all duration-300 left-1/2 -translate-x-1/2 ${drop === item ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-1 opacity-0'}`}>
                   <div className="min-w-[220px] whitespace-nowrap border border-charcoal/10 bg-ivory py-2 text-charcoal shadow-[0_20px_50px_rgba(29,27,25,.12)]">
                     {groups[item].items.map((it) => it.external ? (
                       it.to

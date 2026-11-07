@@ -357,7 +357,29 @@ async function batch6() {
   await patchSetting('home', { why: [why[0], pick('Exclusive materials'), forAll, pick('See it in person')].filter(Boolean) });
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6 };
+// Batch 7: founded 2003, clearer About text, Our Group page text
+async function batch7() {
+  const patchSetting = async (key, patch) => {
+    const cur = (await one(`SELECT value FROM settings WHERE key=$1`, [key]))?.value || {};
+    await q(`INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`, [key, JSON.stringify({ ...cur, ...patch })]);
+  };
+  await patchSetting('about', {
+    since: '2003',
+    intro_en: 'Since 2003, G. M. Andreou Marmi Ltd has brought natural marble, natural granite, quartz and large ceramic and porcelain slabs from leading producers abroad to Cyprus and Greece. We work with companies, developers and contractors, and with homeowners who simply want to renew their kitchen or bathroom.',
+    intro_el: 'Από το 2003, η G. M. Andreou Marmi Ltd φέρνει φυσικά μάρμαρα, φυσικούς γρανίτες, χαλαζία και μεγάλες κεραμικές και πορσελάνινες πλάκες από κορυφαίους παραγωγούς του εξωτερικού στην Κύπρο και την Ελλάδα. Συνεργαζόμαστε με εταιρείες, developers και κατασκευαστές, αλλά και με ιδιώτες που θέλουν απλώς να ανανεώσουν την κουζίνα ή το μπάνιο τους.',
+    body_en: 'Our materials come from partners we trust, including Fondovalle, Quarella, RAK Ceramics, Sachanas Marble, Rekalis Marble and Solomonidis Marbles.\n\nVisit our showroom in the Livadia Industrial Area, Larnaca, to see the materials in person.',
+    body_el: 'Τα υλικά μας προέρχονται από συνεργάτες που εμπιστευόμαστε, όπως οι Fondovalle, Quarella, RAK Ceramics, Sachanas Marble, Rekalis Marble και Solomonidis Marbles.\n\nΕπισκεφθείτε τον εκθεσιακό μας χώρο στη Βιομηχανική Περιοχή Λιβαδιών, στη Λάρνακα, για να δείτε τα υλικά από κοντά.',
+  });
+  await patchSetting('site', {
+    group_text_en: 'G. M. Andreou Marmi is part of a group of companies founded and led by Marios Andreou, with activities in property development, hospitality and fitness: G.M. Marmi Properties, G.M. Respect Developers Ltd, M.D. Dynamic Properties Ltd, Coffee Magek Ltd, Cafe Route 66 Larnaca and APEX Fitness Centre.',
+    group_text_el: 'Η G. M. Andreou Marmi ανήκει σε έναν όμιλο εταιρειών που ίδρυσε και διοικεί ο Μάριος Ανδρέου, με δραστηριότητες στην ανάπτυξη ακινήτων, την εστίαση και την άθληση: G.M. Marmi Properties, G.M. Respect Developers Ltd, M.D. Dynamic Properties Ltd, Coffee Magek Ltd, Cafe Route 66 Larnaca και APEX Fitness Centre.',
+  });
+  const home = (await one(`SELECT value FROM settings WHERE key='home'`))?.value || {};
+  const why = (home.why || []).map((w) => (w.t_en === 'Since 2002' ? { ...w, t_en: 'Since 2003', t_el: 'Από το 2003' } : w));
+  await patchSetting('home', { why });
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);
