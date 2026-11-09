@@ -60,7 +60,7 @@ export default function Materials() {
     <>
       {category ? (
         <>
-          <PageHero img={category.cover} eyebrow={t('materials')} title={tr(category, 'name')} intro={tr(category, 'desc')} />
+          <PageHero img={category.cover} imgs={[category.cover, ...(category.gallery || [])]} eyebrow={t('materials')} title={tr(category, 'name')} intro={tr(category, 'desc')} />
           <SlabFormats formats={category.formats || []} custom={category.custom_sizes} />
         </>
       ) : (

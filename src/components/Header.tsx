@@ -53,7 +53,7 @@ export default function Header() {
   const light = overlay && !scrolled && !menu;
   const nav: [string, string][] = [
     ['/', t('home')], ['/materials', t('materials')], ['/applications', t('applications')],
-    ['/about', t('about')], ['/contact', t('contact')], ['/group', t('group')],
+    ['/about', t('about')], ['/group', t('group')], ['/contact', t('contact')],
   ];
 
   return (

@@ -23,7 +23,7 @@ const TABS: Record<string, { title: string; key: string; groups: G[] }> = {
   site: { title: 'Contact, social and footer', key: 'site', groups: [
     { title: 'Contact', fields: [{ k: 'phone', label: 'Phone (display)', t: 'text' }, { k: 'phone_raw', label: 'Phone (for dialling, no spaces)', t: 'text' }, { k: 'email', label: 'Email', t: 'text' }, { k: 'address', label: 'Address', t: 'text', bi: true }, { k: 'hours', label: 'Opening hours', t: 'area', bi: true, hint: 'Hidden on the website while empty' }, { k: 'map_query', label: 'Google Maps search text', t: 'text' }, { k: 'contact_image', label: 'Contact page background image', t: 'img' }] },
     { title: 'Social', fields: [{ k: 'instagram', label: 'Instagram URL', t: 'text' }, { k: 'facebook', label: 'Facebook URL', t: 'text' }, { k: 'linkedin', label: 'LinkedIn URL', t: 'text' }, { k: 'whatsapp', label: 'WhatsApp number (future use)', t: 'text' }] },
-    { title: 'Our Group page', fields: [{ k: 'group_text', label: 'Text', t: 'area', bi: true, rows: 5 }, { k: 'group_companies', label: 'Companies. Those with a website get a button on the page.', t: 'links' }] },
+    { title: 'Group of companies page', fields: [{ k: 'group_text', label: 'Text', t: 'area', bi: true, rows: 5 }, { k: 'group_companies', label: 'Companies. Those with a website get a link on the page.', t: 'links' }] },
     { title: 'Live chat', fields: [{ k: 'chat_online', label: 'Team online for live chat (off = "Leave us a message", saved as an enquiry)', t: 'bool' }] },
     { title: 'Footer', fields: [{ k: 'company', label: 'Company name', t: 'text' }, { k: 'footer', label: 'Footer line', t: 'text', bi: true }] },
   ] },

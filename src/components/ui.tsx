@@ -46,8 +46,11 @@ export function ProductGrid({ items }: { items: Entry[] }) {
 }
 
 /** Full bleed page hero with slow zoom and rising title */
-export function PageHero({ img, eyebrow, title, intro, children, short = false }: { img?: Img | null; eyebrow?: string; title: string; intro?: string; children?: React.ReactNode; short?: boolean }) {
+/** Full bleed page hero with slow zoom and rising title. With several images it becomes a slideshow that changes every 3 seconds. */
+export function PageHero({ img, imgs, eyebrow, title, intro, children, short = false }: { img?: Img | null; imgs?: (Img | null | undefined)[]; eyebrow?: string; title: string; intro?: string; children?: React.ReactNode; short?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
+  const slides = (imgs && imgs.length ? imgs : [img]).filter((x, i, a): x is Img => !!x && a.findIndex((y) => y?.lg === x.lg) === i);
+  const key = slides.map((x) => x.lg).join('|');
   useLayoutEffect(() => {
     if (!ref.current || reduced()) return;
     const ctx = gsap.context(() => {
@@ -56,10 +59,10 @@ export function PageHero({ img, eyebrow, title, intro, children, short = false }
       gsap.fromTo('.ph-fade', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1.2, delay: 1.2, stagger: 0.1, ease: 'power3.out' });
     }, ref);
     return () => ctx.revert();
-  }, [img?.lg]);
+  }, [key]);
   return (
     <section ref={ref} className={`relative flex ${short ? 'h-[68svh] min-h-[480px]' : 'h-[88svh] min-h-[560px]'} items-end overflow-hidden bg-ink text-ivory`} data-dark>
-      <div className="ph-img absolute inset-0"><Picture img={img} eager /></div>
+      <div className="ph-img absolute inset-0">{slides.length > 1 ? <Slides slides={slides} /> : <Picture img={slides[0]} eager />}</div>
       <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/20 to-ink/30" />
       <div className="wrap relative pb-16 sm:pb-20">
         {eyebrow && <div className="ph-fade eyebrow mb-6 text-sand">{eyebrow}</div>}
@@ -68,6 +71,53 @@ export function PageHero({ img, eyebrow, title, intro, children, short = false }
         {children && <div className="ph-fade mt-10">{children}</div>}
       </div>
     </section>
+  );
+}
+
+const SLIDE_MS = 3000;
+/** Image slideshow: the next image wipes in from the right with a slow zoom, a counter and progress line sit bottom right */
+function Slides({ slides }: { slides: Img[] }) {
+  const [cur, setCur] = useState(0);
+  const layers = useRef<(HTMLDivElement | null)[]>([]);
+  const prev = useRef(0);
+  useEffect(() => {
+    // the first change waits for the hero intro to finish
+    let id: ReturnType<typeof setInterval>;
+    const start = setTimeout(() => { setCur((c) => (c + 1) % slides.length); id = setInterval(() => setCur((c) => (c + 1) % slides.length), SLIDE_MS); }, SLIDE_MS + 1200);
+    return () => { clearTimeout(start); clearInterval(id); };
+  }, [slides.length]);
+  useEffect(() => {
+    const el = layers.current[cur];
+    const old = layers.current[prev.current];
+    if (!el || cur === prev.current) return;
+    layers.current.forEach((l, i) => { if (l) l.style.zIndex = i === cur ? '2' : l === old ? '1' : '0'; });
+    if (reduced()) { gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.8 }); }
+    else {
+      gsap.fromTo(el, { clipPath: 'inset(0 0 0 100%)' }, { clipPath: 'inset(0 0 0 0%)', duration: 1.4, ease: 'expo.inOut' });
+      gsap.fromTo(el.firstElementChild, { scale: 1.2 }, { scale: 1.04, duration: SLIDE_MS / 1000 + 1.4, ease: 'power2.out' });
+      if (old) gsap.to(old.firstElementChild, { scale: 1.12, xPercent: -6, duration: 1.4, ease: 'expo.inOut' });
+    }
+    prev.current = cur;
+  }, [cur]);
+  return (
+    <>
+      {slides.map((im, i) => (
+        <div key={im.lg} ref={(r) => { layers.current[i] = r; }} className="absolute inset-0 overflow-hidden" style={{ zIndex: i === 0 ? 2 : 0 }}>
+          <div className="h-full w-full scale-[1.04]"><Picture img={im} eager={i === 0} /></div>
+        </div>
+      ))}
+      <div className="absolute bottom-8 right-6 z-10 flex items-center gap-4 text-[11px] font-medium tracking-wide2 text-ivory/80 sm:bottom-12 sm:right-10">
+        <span>{String(cur + 1).padStart(2, '0')}</span>
+        <span className="flex gap-2">
+          {slides.map((im, i) => (
+            <span key={im.lg} className="relative block h-px w-10 overflow-hidden bg-ivory/25 sm:w-14">
+              {i === cur && <span key={`p${cur}`} className="absolute inset-0 origin-left bg-ivory" style={{ animation: `slideprog ${SLIDE_MS}ms linear forwards` }} />}
+            </span>
+          ))}
+        </span>
+        <span className="text-ivory/50">{String(slides.length).padStart(2, '0')}</span>
+      </div>
+    </>
   );
 }
 

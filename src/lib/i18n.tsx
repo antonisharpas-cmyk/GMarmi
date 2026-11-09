@@ -5,8 +5,8 @@ export type Lang = 'en' | 'el';
 
 const S = {
   en: {
-    group: 'Our Group', groupCompanies: 'Companies of the group', colours: 'Colours', groupTitle: 'One group, many spaces', visitSite: 'Visit website', formats: 'Formats', customSizes: 'Cut to any size, to fit your project.', materialsFor: 'Materials for this application', partners: 'Our partners', since: 'Since', founder: 'The founder', home: 'Home', materials: 'Materials', applications: 'Applications',
-    about: 'About', contact: 'Contact', enquire: 'Enquire', faq: 'FAQ', menu: 'Menu', close: 'Close',
+    group: 'Group of companies', groupCompanies: 'Companies of the group', colours: 'Colours', groupTitle: 'One group, many spaces', visitSite: 'Visit website', formats: 'Formats', customSizes: 'Cut to any size, to fit your project.', materialsFor: 'Materials for this application', partners: 'Our partners', since: 'Since', founder: 'The founder', home: 'Home', materials: 'Materials', applications: 'Applications',
+    about: 'About us', contact: 'Contact', enquire: 'Enquire', faq: 'FAQ', menu: 'Menu', close: 'Close',
     explore: 'Explore', view: 'View', allMaterials: 'All materials', viewAll: 'View all', discover: 'Discover',
     requestInfo: 'Request information', requestQuote: 'Request a quote',
     overview: 'Overview', specifications: 'Specifications', gallery: 'Gallery', features: 'Highlights',

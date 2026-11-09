@@ -86,3 +86,5 @@
 
 /* prose for CMS text */
 .prose-gm p { margin: 0 0 1.2em; line-height: 1.85; color: #6F675F; white-space: pre-line; }
+
+@keyframes slideprog { from { transform: scaleX(0); } to { transform: scaleX(1); } }

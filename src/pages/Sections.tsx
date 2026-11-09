@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLang } from '../lib/i18n';
 import { useApi, useSite, productPath } from '../lib/site';
 import { groupFormats, Slab, SizeLabel } from '../components/SlabFormats';
-import { Picture, Reveal, RiseText, FadeUp } from '../components/Reveal';
-import { Lightbox, Loading, NotFoundBlock, PageHero, PageTitle, Tile, useTitle, variantAt } from '../components/ui';
+import { RiseText, FadeUp } from '../components/Reveal';
+import { Loading, NotFoundBlock, PageHero, PageTitle, Tile, useTitle } from '../components/ui';
 import { useEnquiry } from '../components/EnquiryDrawer';
 import type { Entry } from '../lib/types';
 
@@ -97,7 +96,6 @@ export function DetailPage() {
   const { open } = useEnquiry();
   const s = useSite();
   const { data, error } = useApi<{ item: Entry; related: any }>(`/api/entries/application/${slug}`);
-  const [lb, setLb] = useState<number | null>(null);
   const e = data?.item;
   useTitle(e ? tr(e, 'name') : undefined);
   if (error) return <NotFoundBlock />;
@@ -106,20 +104,7 @@ export function DetailPage() {
   const gallery = e.gallery || [];
   return (
     <>
-      <PageHero img={e.cover} eyebrow={t('applications')} title={tr(e, 'name')} intro={tr(e, 'tagline') || tr(e, 'desc')} />
-
-      {gallery.length > 1 && (
-        <section className="bg-marble py-24 sm:py-32">
-          <div className="wrap grid gap-6 sm:grid-cols-2 lg:grid-cols-12">
-            {gallery.map((g, i) => (
-              <button key={g.id} onClick={() => setLb(i)} data-cursor="view"
-                className={`tile block ${['lg:col-span-8', 'lg:col-span-4 lg:mt-32', 'lg:col-span-5', 'lg:col-span-7 lg:-mt-16'][i % 4]}`}>
-                <Reveal variant={variantAt(i)} className={i % 4 === 1 ? 'aspect-[3/4]' : 'aspect-[4/3]'}><Picture img={g} sizes="(min-width:1024px) 60vw, 100vw" /></Reveal>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
+      <PageHero img={e.cover} imgs={[e.cover, ...gallery]} eyebrow={t('applications')} title={tr(e, 'name')} intro={tr(e, 'tagline') || tr(e, 'desc')} />
 
       {r.categories?.length > 0 && (
         <section className="wrap py-24 sm:py-32">
@@ -130,7 +115,6 @@ export function DetailPage() {
           <button onClick={() => open({ type: 'product' })} className="btn btn-dark group mt-16" data-cursor="enquire"><span>{t('requestInfo')}</span><span className="arrow">→</span></button>
         </section>
       )}
-      <Lightbox images={gallery} index={lb} onClose={() => setLb(null)} />
     </>
   );
 }

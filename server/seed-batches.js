@@ -353,8 +353,8 @@ async function batch7() {
     body_el: 'Τα υλικά μας προέρχονται από συνεργάτες που εμπιστευόμαστε, όπως οι Fondovalle, Quarella, RAK Ceramics, Sachanas Marble, Rekalis Marble και Solomonidis Marbles.\n\nΕπισκεφθείτε τον εκθεσιακό μας χώρο στη Βιομηχανική Περιοχή Λιβαδιών, στη Λάρνακα, για να δείτε τα υλικά από κοντά.',
   });
   await patchSetting('site', {
-    group_text_en: 'G. M. Andreou Marmi is part of a group of companies founded and led by Marios Andreou, with activities in property development, hospitality and fitness: G.M. Marmi Properties, G.M. Respect Developers Ltd, M.D. Dynamic Properties Ltd, Coffee Magek Ltd, Cafe Route 66 Larnaca and APEX Fitness Centre.',
-    group_text_el: 'Η G. M. Andreou Marmi ανήκει σε έναν όμιλο εταιρειών που ίδρυσε και διοικεί ο Μάριος Ανδρέου, με δραστηριότητες στην ανάπτυξη ακινήτων, την εστίαση και την άθληση: G.M. Marmi Properties, G.M. Respect Developers Ltd, M.D. Dynamic Properties Ltd, Coffee Magek Ltd, Cafe Route 66 Larnaca και APEX Fitness Centre.',
+    group_text_en: 'G. M. Andreou Marmi is part of a group of companies founded and led by Marios Andreou, with activities in property development, hospitality and fitness.',
+    group_text_el: 'Η G. M. Andreou Marmi ανήκει σε έναν όμιλο εταιρειών που ίδρυσε και διοικεί ο Μάριος Ανδρέου, με δραστηριότητες στην ανάπτυξη ακινήτων, την εστίαση και την άθληση.',
   });
   const home = (await one(`SELECT value FROM settings WHERE key='home'`))?.value || {};
   const why = (home.why || []).map((w) => (w.t_en === 'Since 2002' ? { ...w, t_en: 'Since 2003', t_el: 'Από το 2003' } : w));
@@ -452,7 +452,51 @@ async function batch11() {
   }
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11 };
+// the companies now appear as a list on the Our Group page, so the text no longer names them
+async function batch12() {
+  const row = await one(`SELECT value FROM settings WHERE key='site'`);
+  if (!row) return;
+  const v = row.value;
+  const cut = (t, end) => (typeof t === 'string' && t.includes(end + ':') ? t.slice(0, t.indexOf(end + ':')) + end + '.' : t);
+  v.group_text_en = cut(v.group_text_en, 'hospitality and fitness');
+  v.group_text_el = cut(v.group_text_el, 'την εστίαση και την άθληση');
+  await q(`UPDATE settings SET value=$1, updated_at=NOW() WHERE key='site'`, [JSON.stringify(v)]);
+}
+
+// High quality photos: 2 to 3 per application (first one is the main image, the rest rotate in the page hero)
+// and one or two per material category (shown on the homepage and the category page)
+async function batch13() {
+  const sets = {
+    application: {
+      kitchens: [['app-kitchens-1', 'Kitchen with marble look island by Fondovalle'], ['app-kitchens-2', 'Kitchen with Calacatta wall and floor'], ['app-kitchens-3', 'Kitchen in travertine look surfaces']],
+      bathrooms: [['app-bathrooms-1', 'Shower in green marble look slabs'], ['app-bathrooms-2', 'Bathroom wall in large slabs'], ['app-bathrooms-3', 'Bathroom with stone look wall']],
+      'countertops-islands': [['app-countertops-islands-1', 'Kitchen island in stone look slabs'], ['app-countertops-islands-2', 'Island and backsplash in terrazzo look slabs'], ['app-countertops-islands-3', 'Marble look reception counter']],
+      'wall-cladding': [['app-wall-cladding-1', 'Green marble look wall'], ['app-wall-cladding-2', 'Living room clad in green slabs'], ['app-wall-cladding-3', 'White marble look walls and floor']],
+      staircases: [['app-staircases-1', 'Marble staircase'], ['app-staircases-2', 'Stone steps by a pool']],
+      hospitality: [['app-hospitality-1', 'Hotel lobby in stone look slabs'], ['app-hospitality-2', 'Bar with marble look counter'], ['app-hospitality-3', 'Restaurant with tiled walls']],
+      pools: [['app-pools-3', 'Pool deck in natural marble'], ['app-pools-1', 'Infinity pool with marble steps'], ['app-pools-2', 'Hotel pool with marble floor']],
+    },
+    category: {
+      'mytop-fondovalle': [['cat-mytop-fondovalle-1', 'MY TOP kitchen island by Fondovalle']],
+      'rak-ceramics': [['cat-rak-ceramics-1', 'RAK Maximus Carrara kitchen'], ['cat-rak-ceramics-2', 'RAK Maximus Moon Stone island']],
+      porcelanato: [['cat-porcelanato-1', 'Porcelain slabs indoors and outdoors']],
+      quartz: [['cat-quartz-1', 'Quartz kitchen island'], ['cat-quartz-2', 'Quartz kitchen worktops']],
+      'natural-marble': [['cat-natural-marble-1', 'Natural marble bathroom'], ['cat-natural-marble-2', 'Natural marble slab']],
+      'natural-granite': [['cat-natural-granite-1', 'Granite kitchen worktop']],
+    },
+  };
+  for (const [type, list] of Object.entries(sets)) {
+    for (const [slug, imgs] of Object.entries(list)) {
+      const id = await idOf(type, slug);
+      if (!id) continue;
+      const ids = [];
+      for (const [name, alt] of imgs) ids.push(await media(name, alt));
+      await q(`UPDATE entries SET images=$2, cover_id=$3, updated_at=NOW() WHERE id=$1`, [id, JSON.stringify(ids), ids[0]]);
+    }
+  }
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);
