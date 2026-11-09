@@ -64,7 +64,7 @@ export default function Materials() {
           <SlabFormats formats={category.formats || []} custom={category.custom_sizes} />
         </>
       ) : (
-        <PageTitle eyebrow={t('materials')} title={lang === 'el' ? 'Η συλλογή υλικών' : 'The material collection'} intro={tr(s.seo, 'desc')} />
+        <PageHero imgs={s.categories.map((c) => c.cover)} eyebrow={t('materials')} title={lang === 'el' ? 'Η συλλογή υλικών' : 'The material collection'} intro={tr(s.seo, 'desc')} />
       )}
 
       <section className="wrap pb-32 pt-14">

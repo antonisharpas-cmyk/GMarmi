@@ -496,7 +496,35 @@ async function batch13() {
   }
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13 };
+// The new high quality photos also on the homepage, About, Contact and the Group of companies page
+async function batch14() {
+  const m = (name, alt) => media(name, alt);
+  const home = await one(`SELECT value FROM settings WHERE key='home'`);
+  if (home) {
+    const h = home.value;
+    h.hero_image = await m('app-kitchens-1', 'Kitchen with marble look island');
+    h.intro_images = [await m('cat-natural-marble-2', 'Natural marble slab'), await m('app-countertops-islands-2', 'Island in terrazzo look slabs'), await m('app-hospitality-1', 'Hotel lobby in stone look slabs')];
+    h.story_image = await m('app-wall-cladding-1', 'Green marble look wall');
+    h.cta_image = await m('app-kitchens-2', 'Kitchen with Calacatta wall and floor');
+    await q(`UPDATE settings SET value=$1, updated_at=NOW() WHERE key='home'`, [JSON.stringify(h)]);
+  }
+  const about = await one(`SELECT value FROM settings WHERE key='about'`);
+  if (about) {
+    const a = about.value;
+    a.image = await m('app-countertops-islands-3', 'Marble look reception counter');
+    a.image_2 = await m('cat-natural-marble-1', 'Natural marble bathroom');
+    await q(`UPDATE settings SET value=$1, updated_at=NOW() WHERE key='about'`, [JSON.stringify(a)]);
+  }
+  const site = await one(`SELECT value FROM settings WHERE key='site'`);
+  if (site) {
+    const v = site.value;
+    v.contact_image = await m('app-countertops-islands-1', 'Kitchen island in stone look slabs');
+    v.group_image = await m('app-wall-cladding-2', 'Living room clad in green slabs');
+    await q(`UPDATE settings SET value=$1, updated_at=NOW() WHERE key='site'`, [JSON.stringify(v)]);
+  }
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);

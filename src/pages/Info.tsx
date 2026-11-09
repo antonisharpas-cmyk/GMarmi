@@ -72,8 +72,8 @@ export function Group() {
   const companies = ((s.site.group_companies || []) as { name: string; url: string }[]).filter((c) => c.name);
   return (
     <>
-      <PageTitle eyebrow={t('group')} title={t('groupTitle')} />
-      <section className="wrap pb-32">
+      <PageHero short img={s.site.group_image || s.home.cta_image} eyebrow={t('group')} title={t('groupTitle')} />
+      <section className="wrap pb-32 pt-20 sm:pt-28">
         <FadeUp><p className="max-w-3xl font-display text-[26px] font-light leading-[1.5] sm:text-[34px]">{tr(s.site, 'group_text')}</p></FadeUp>
         {companies.length > 0 && <GroupList items={companies} />}
       </section>
