@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLang } from '../lib/i18n';
 import { useApi, useSite, productPath } from '../lib/site';
@@ -43,6 +44,27 @@ export function ListPage() {
   );
 }
 
+/** Horizontal list that the mouse wheel scrolls sideways (the page does not move while it can still scroll) */
+function HScroll({ className, children }: { className: string; children: React.ReactNode }) {
+  const ref = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const on = (ev: WheelEvent) => {
+      if (Math.abs(ev.deltaY) <= Math.abs(ev.deltaX)) return;
+      const max = el.scrollWidth - el.clientWidth;
+      if (max <= 0) return;
+      const next = Math.min(max, Math.max(0, el.scrollLeft + ev.deltaY));
+      if (next === el.scrollLeft) return;
+      el.scrollLeft = next;
+      ev.preventDefault();
+    };
+    el.addEventListener('wheel', on, { passive: false });
+    return () => el.removeEventListener('wheel', on);
+  }, []);
+  return <ul ref={ref} className={className} data-lenis-prevent>{children}</ul>;
+}
+
 /** Category tile; on desktop hover a card shows its sizes and the colours available for this application */
 function CategoryCard({ c, i }: { c: Entry; i: number }) {
   const { t, tr, lp } = useLang();
@@ -57,7 +79,23 @@ function CategoryCard({ c, i }: { c: Entry; i: number }) {
           <div className="max-h-[440px] overflow-y-auto border border-charcoal/10 bg-ivory p-6 shadow-[0_30px_70px_rgba(29,27,25,.18)]" data-lenis-prevent>
             <Link to={lp(`/materials/${c.slug}`)} className="font-display text-2xl">{tr(c, 'name')}</Link>
             <div className="eyebrow mb-2 mt-5">{t('formats')}</div>
-            {formats.length ? (
+            {formats.length ? (groupFormats(formats).length > 3 ? (
+              /* many sizes (RAK, Porcelanato): one row that scrolls sideways, the mouse wheel moves it too */
+              <div className="relative -mx-6">
+                <HScroll className="slim-scroll flex gap-6 overflow-x-auto px-6 pb-3 text-[13px]">
+                  {groupFormats(formats).map((f, k) => {
+                    const max = Math.max(...formats.map((x) => Math.max(x.w, x.l)), 1);
+                    return (
+                      <li key={k} className="flex shrink-0 flex-col items-start gap-2">
+                        <Slab w={f.w} l={f.l} t={Number(f.th[f.th.length - 1]) || 12} max={max} className="h-12 w-20" />
+                        <SizeLabel w={f.w} l={f.l} th={f.th} />
+                      </li>
+                    );
+                  })}
+                </HScroll>
+                <span className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-ivory to-transparent" aria-hidden />
+              </div>
+            ) : (
               <ul className="space-y-3 text-sm">
                 {groupFormats(formats).map((f, k) => {
                   const max = Math.max(...formats.map((x) => Math.max(x.w, x.l)), 1);
@@ -69,7 +107,7 @@ function CategoryCard({ c, i }: { c: Entry; i: number }) {
                   );
                 })}
               </ul>
-            ) : <p className="text-sm text-warm">{t('customSizes')}</p>}
+            )) : <p className="text-sm text-warm">{t('customSizes')}</p>}
             {colours.length > 0 && (
               <>
                 <div className="eyebrow mb-3 mt-6">{t('colours')}</div>
