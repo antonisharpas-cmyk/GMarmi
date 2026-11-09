@@ -5,7 +5,7 @@ export type Lang = 'en' | 'el';
 
 const S = {
   en: {
-    group: 'Our Group', colours: 'Colours', groupTitle: 'One group, many spaces', visitSite: 'Visit website', formats: 'Formats', customSizes: 'Cut to any size, to fit your project.', materialsFor: 'Materials for this application', partners: 'Our partners', since: 'Since', founder: 'The founder', home: 'Home', materials: 'Materials', applications: 'Applications',
+    group: 'Our Group', groupCompanies: 'Companies of the group', colours: 'Colours', groupTitle: 'One group, many spaces', visitSite: 'Visit website', formats: 'Formats', customSizes: 'Cut to any size, to fit your project.', materialsFor: 'Materials for this application', partners: 'Our partners', since: 'Since', founder: 'The founder', home: 'Home', materials: 'Materials', applications: 'Applications',
     about: 'About', contact: 'Contact', enquire: 'Enquire', faq: 'FAQ', menu: 'Menu', close: 'Close',
     explore: 'Explore', view: 'View', allMaterials: 'All materials', viewAll: 'View all', discover: 'Discover',
     requestInfo: 'Request information', requestQuote: 'Request a quote',
@@ -44,7 +44,7 @@ const S = {
     fq_materials: 'Materials', fq_products: 'Products', fq_orders: 'Orders', fq_showroom: 'Showroom', fq_general: 'General',
   },
   el: {
-    group: 'Ο Όμιλος', colours: 'Χρώματα', groupTitle: 'Ένας όμιλος, πολλοί χώροι', visitSite: 'Επισκεφθείτε την ιστοσελίδα', formats: 'Διαστάσεις', customSizes: 'Κοπή σε οποιαδήποτε διάσταση, ανάλογα με το έργο σας.', materialsFor: 'Υλικά για αυτή την εφαρμογή', partners: 'Οι συνεργάτες μας', since: 'Από το', founder: 'Ο ιδρυτής', home: 'Αρχική', materials: 'Υλικά', applications: 'Εφαρμογές',
+    group: 'Ο Όμιλος', groupCompanies: 'Οι εταιρείες του ομίλου', colours: 'Χρώματα', groupTitle: 'Ένας όμιλος, πολλοί χώροι', visitSite: 'Επισκεφθείτε την ιστοσελίδα', formats: 'Διαστάσεις', customSizes: 'Κοπή σε οποιαδήποτε διάσταση, ανάλογα με το έργο σας.', materialsFor: 'Υλικά για αυτή την εφαρμογή', partners: 'Οι συνεργάτες μας', since: 'Από το', founder: 'Ο ιδρυτής', home: 'Αρχική', materials: 'Υλικά', applications: 'Εφαρμογές',
     about: 'Η Εταιρεία', contact: 'Επικοινωνία', enquire: 'Αίτημα', faq: 'Συχνές Ερωτήσεις', menu: 'Μενού', close: 'Κλείσιμο',
     explore: 'Δείτε', view: 'Προβολή', allMaterials: 'Όλα τα υλικά', viewAll: 'Δείτε όλα', discover: 'Ανακαλύψτε',
     requestInfo: 'Ζητήστε πληροφορίες', requestQuote: 'Ζητήστε προσφορά',

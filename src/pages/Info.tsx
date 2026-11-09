@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../lib/i18n';
 import { useApi, useSite } from '../lib/site';
 import { track } from '../lib/api';
+import { EASE, gsap, reduced } from '../lib/motion';
 import { Picture, Reveal, RiseText, FadeUp } from '../components/Reveal';
 import { Loading, PageHero, PageTitle, useTitle } from '../components/ui';
 import EnquiryForm from '../components/EnquiryForm';
@@ -68,19 +69,67 @@ export function Group() {
   const { t, tr } = useLang();
   useTitle(t('group'));
   if (!s) return <Loading />;
-  const links = ((s.site.group_companies || []) as { name: string; url: string }[]).filter((c) => c.name && c.url);
+  const companies = ((s.site.group_companies || []) as { name: string; url: string }[]).filter((c) => c.name);
   return (
     <>
       <PageTitle eyebrow={t('group')} title={t('groupTitle')} />
       <section className="wrap pb-32">
         <FadeUp><p className="max-w-3xl font-display text-[26px] font-light leading-[1.5] sm:text-[34px]">{tr(s.site, 'group_text')}</p></FadeUp>
-        {links.length > 0 && (
-          <div className="mt-14 flex flex-wrap gap-4">
-            {links.map((c) => <a key={c.url} href={c.url} target="_blank" rel="noreferrer" className="btn btn-line group"><span>{c.name}</span><span className="arrow">↗</span></a>)}
-          </div>
-        )}
+        {companies.length > 0 && <GroupList items={companies} />}
       </section>
     </>
+  );
+}
+
+/** Group companies as an animated, numbered list. Rows draw in on scroll; those with a website open it. */
+function GroupList({ items }: { items: { name: string; url: string }[] }) {
+  const { t } = useLang();
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (!ref.current || reduced()) return;
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>('[data-row]').forEach((row) => {
+        const tl = gsap.timeline({ scrollTrigger: { trigger: row, start: 'top 88%', once: true } });
+        tl.from(row.querySelector('[data-line]'), { scaleX: 0, duration: 1.2, ease: EASE })
+          .from(row.querySelector('[data-num]'), { opacity: 0, y: 12, duration: 0.8, ease: EASE }, 0.15)
+          .from(row.querySelector('[data-name]'), { yPercent: 110, duration: 1.1, ease: EASE }, 0.2)
+          .from(row.querySelector('[data-end]'), { opacity: 0, x: -12, duration: 0.8, ease: EASE }, 0.45);
+      });
+    }, ref);
+    return () => ctx.revert();
+  }, [items.length]);
+  return (
+    <div ref={ref} className="mt-24">
+      <div className="eyebrow mb-8 flex items-center justify-between"><span>{t('groupCompanies')}</span><span className="text-taupe">{String(items.length).padStart(2, '0')}</span></div>
+      <ul>
+        {items.map((c, i) => {
+          const inner = (
+            <>
+              <span data-line className="absolute inset-x-0 top-0 h-px origin-left bg-charcoal/15" />
+              <span className="absolute inset-0 origin-left scale-x-0 bg-charcoal transition-transform duration-700 ease-lux group-hover:scale-x-100" aria-hidden />
+              <span data-num className="relative w-12 shrink-0 font-caps text-xs tracking-wide2 text-bronze transition-colors duration-500 sm:w-20">{String(i + 1).padStart(2, '0')}</span>
+              <span className="relative flex-1 overflow-hidden py-1">
+                <span data-name className="block"><span className="block font-display text-[26px] font-light leading-tight transition-[transform,color] duration-700 ease-lux group-hover:translate-x-3 group-hover:text-ivory sm:text-[40px]">{c.name}</span></span>
+              </span>
+              <span data-end className="relative shrink-0">
+                {c.url
+                  ? <span className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-wide2 transition-colors duration-500 group-hover:text-ivory"><span className="hidden sm:inline">{t('visitSite')}</span><span className="inline-block transition-transform duration-500 group-hover:-translate-y-1 group-hover:translate-x-1">↗</span></span>
+                  : <span className="block h-2.5 w-2.5 rotate-45 border border-taupe transition-all duration-700 ease-lux group-hover:rotate-[225deg] group-hover:border-sand group-hover:bg-sand" />}
+              </span>
+            </>
+          );
+          const cls = 'group relative flex items-center gap-4 overflow-hidden px-2 py-7 sm:gap-8 sm:px-4 sm:py-9';
+          return (
+            <li key={c.name} data-row className="relative">
+              {c.url
+                ? <a href={c.url} target="_blank" rel="noreferrer" className={cls} data-cursor="link">{inner}</a>
+                : <div className={cls}>{inner}</div>}
+            </li>
+          );
+        })}
+        <li className="h-px bg-charcoal/15" aria-hidden />
+      </ul>
+    </div>
   );
 }
 
