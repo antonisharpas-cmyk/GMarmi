@@ -245,31 +245,58 @@ export function Legal({ k }: { k: 'privacy' | 'cookies' | 'terms' }) {
 }
 
 // Hidden "link in bio" page for Instagram and Facebook
+const LI = {
+  home: <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" />,
+  apps: <><rect x="3" y="3" width="7.5" height="7.5" rx="1" /><rect x="13.5" y="3" width="7.5" height="7.5" rx="1" /><rect x="3" y="13.5" width="7.5" height="7.5" rx="1" /><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1" /></>,
+  fb: <><circle cx="12" cy="12" r="9" /><path d="M13.5 21v-7h2.5l.5-3h-3V9.5c0-.9.4-1.5 1.6-1.5H16.5V5.4c-.4-.1-1.3-.2-2.3-.2-2.3 0-3.7 1.4-3.7 3.9V11H8v3h2.5v7" /></>,
+  ig: <><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r=".8" fill="currentColor" /></>,
+  phone: <path d="M5 4h3l1.5 4.5-2 1.2a11 11 0 0 0 6.8 6.8l1.2-2L20 16v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />,
+  mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></>,
+  pin: <><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></>,
+};
+const LIcon = ({ k }: { k: keyof typeof LI }) => <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] shrink-0 text-sand" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">{LI[k]}</svg>;
+
 export function LinkPage() {
   const s = useSite();
-  const { t, tr, lp } = useLang();
+  const { tr, lp, lang } = useLang();
   if (!s) return <Loading />;
-  const links: [string, string, boolean?][] = [
-    [lp('/materials'), t('materials')], [lp('/applications'), t('applications')],
-    [lp('/contact'), t('contact')], [`tel:${s.site.phone_raw}`, `${t('phone')} · ${s.site.phone}`, true], [`mailto:${s.site.email}`, s.site.email, true],
+  const el = lang === 'el';
+  const site = s.site;
+  const items: { k: keyof typeof LI; label: string; to?: string; href?: string; main?: boolean }[] = [
+    { k: 'home', label: el ? 'Επισκεφθείτε την ιστοσελίδα' : 'Visit our website', to: lp('/') },
+    { k: 'apps', label: el ? 'Εφαρμογές' : 'Applications', to: lp('/applications') },
+    ...(site.facebook ? [{ k: 'fb' as const, label: 'Facebook', href: site.facebook }] : []),
+    ...(site.instagram ? [{ k: 'ig' as const, label: 'Instagram', href: site.instagram }] : []),
+    ...(site.phone ? [{ k: 'phone' as const, label: el ? 'Καλέστε μας' : 'Call us', href: `tel:${site.phone_raw || site.phone}`, main: true }] : []),
+    ...(site.email ? [{ k: 'mail' as const, label: el ? 'Στείλτε μας email' : 'Email us', href: `mailto:${site.email}` }] : []),
   ];
+  const cls = (main?: boolean) => `flex w-full items-center justify-center gap-3 rounded-full py-4 text-[12px] font-semibold uppercase tracking-[0.2em] transition-all duration-300 ${main
+    ? 'bg-bronze text-ivory hover:bg-sand hover:text-ink'
+    : 'border border-ivory/20 text-ivory hover:border-sand/70 hover:bg-ivory/[0.04]'}`;
   return (
-    <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-ink px-6 py-20 text-ivory" data-dark>
+    <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-ink px-5 py-14 text-ivory" data-dark>
       <div className="absolute inset-0 opacity-40"><Picture img={s.home.hero_image} eager /></div>
       <div className="absolute inset-0 bg-ink/60" />
-      <div className="relative w-full max-w-sm text-center">
-        <img src="/brand/logo-light.png" alt="G. M. Andreou Marmi Ltd" className="mx-auto w-48" />
-        <p className="mt-6 font-display text-2xl font-light">{tr(s.site, 'footer')}</p>
-        <div className="mt-10 space-y-3">
-          {links.map(([href, label, ext]) => ext
-            ? <a key={href} href={href} className="block border border-ivory/30 py-4 text-[11px] uppercase tracking-wide2 transition-colors hover:bg-ivory hover:text-charcoal">{label}</a>
-            : <Link key={href} to={href} className="block border border-ivory/30 py-4 text-[11px] uppercase tracking-wide2 transition-colors hover:bg-ivory hover:text-charcoal">{label}</Link>)}
+      <div className="relative w-full max-w-[560px] text-center">
+        <img src="/brand/logo-light.png" alt="G. M. Andreou Marmi Ltd" className="mx-auto w-44" />
+        <div className="mt-4 text-[11px] font-medium uppercase tracking-[0.35em] text-sand/80">{el ? 'Μάρμαρα · Γρανίτες · Επιφάνειες' : 'Marble · Granite · Surfaces'}</div>
+        <p className="mt-5 font-display text-2xl font-light text-ivory/90">{tr(site, 'footer')}</p>
+        <div className="mt-9 space-y-3">
+          {items.map((it) => it.to
+            ? <Link key={it.label} to={it.to} className={cls(it.main)}><LIcon k={it.k} />{it.label}</Link>
+            : <a key={it.label} href={it.href} target={it.href?.startsWith('http') ? '_blank' : undefined} rel="noreferrer" className={cls(it.main)}><LIcon k={it.k} />{it.label}</a>)}
         </div>
-        <div className="mt-10 flex justify-center gap-6 text-ivory/70">
-          {s.site.instagram && <a href={s.site.instagram} aria-label="Instagram"><IconInstagram className="h-5 w-5" /></a>}
-          {s.site.facebook && <a href={s.site.facebook} aria-label="Facebook"><IconFacebook className="h-5 w-5" /></a>}
-        </div>
-        <RiseText as="span" className="sr-only">G. M. Andreou Marmi</RiseText>
+        {tr(site, 'address') && (
+          <div className="mt-9 flex flex-col items-center gap-2 text-[12px] uppercase leading-relaxed tracking-[0.18em] text-ivory/55">
+            <LIcon k="pin" />
+            <span className="max-w-sm">{tr(site, 'address')}</span>
+          </div>
+        )}
+        <a href="https://www.ergonsite.com" target="_blank" rel="noreferrer" className="mt-8 inline-flex items-center gap-2 text-[12px] text-ivory/45 hover:text-ivory/80">
+          {el ? 'Ανάπτυξη & σχεδιασμός από' : 'Developed & designed by'}
+          <img src="https://ergonsite.com/assets/logo.png" alt="ErgonSite" className="h-5 w-auto opacity-80" onError={(e) => { const i = e.currentTarget; i.style.display = 'none'; i.nextElementSibling?.classList.remove('hidden'); }} />
+          <span className="hidden font-semibold text-ivory/80">ErgonSite</span>
+        </a>
       </div>
     </section>
   );

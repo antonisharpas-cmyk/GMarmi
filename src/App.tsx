@@ -71,7 +71,7 @@ function Site() {
           </main>
           <div key={`c${pathname}`} className="curtain pointer-events-none fixed inset-0 z-[80] bg-charcoal" aria-hidden />
           {!bare && <Footer />}
-          <ChatWidget />
+          {!bare && <ChatWidget />}
           <Cursor />
         </EnquiryProvider>
       </SiteProvider>

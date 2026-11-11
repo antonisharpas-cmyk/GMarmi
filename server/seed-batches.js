@@ -273,7 +273,7 @@ async function batch6() {
     kitchens: main, bathrooms: main, 'countertops-islands': main, hospitality: main,
     'wall-cladding': [C['mytop-fondovalle'], C['rak-ceramics']],
     staircases: [C['mytop-fondovalle'], C['rak-ceramics'], C.porcelanato, C.quartz, C['natural-marble'], C['natural-granite']],
-    pools: [],
+    pools: [C['natural-marble']],
   };
   const appOrder = ['kitchens', 'bathrooms', 'countertops-islands', 'wall-cladding', 'staircases', 'hospitality', 'pools'];
   for (let i = 0; i < appOrder.length; i++) {
@@ -524,7 +524,14 @@ async function batch14() {
   }
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14 };
+// Pools: the materials offered are natural marbles
+async function batch15() {
+  const pools = await idOf('application', 'pools');
+  const marble = await idOf('category', 'natural-marble');
+  if (pools && marble) await q(`UPDATE entries SET data = json_set(json_remove(data, '$.admin_note'), '$.category_ids', json($2)), updated_at=NOW() WHERE id=$1`, [pools, JSON.stringify([marble])]);
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);
