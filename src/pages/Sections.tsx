@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { scrollLock } from '../lib/motion';
 import { Link, useParams } from 'react-router-dom';
 import { useLang } from '../lib/i18n';
 import { useApi, useSite, productPath } from '../lib/site';
@@ -73,84 +74,105 @@ function CategoryCard({ c, i, app }: { c: Entry; i: number; app: number }) {
   const formats: { t: string; w: number; l: number }[] = c.formats || [];
   const colours: Entry[] = c.colours || [];
   const examples: { sm: string; alt?: string }[] = c.examples || [];
+  // on phones there is no hover: the same card opens in a sheet from the bottom
+  const [sheet, setSheet] = useState(false);
+  useEffect(() => { scrollLock(sheet); return () => scrollLock(false); }, [sheet]);
+  // the card contents, shown on hover on desktop and in a sheet on phones
+  const body = (
+    <>
+      {tr(c, 'kind') && <div className="eyebrow mb-2">{tr(c, 'kind')}</div>}
+      <Link to={lp(`/materials/${c.slug}`)} className="font-display text-2xl">{tr(c, 'name')}</Link>
+      <div className="eyebrow mb-2 mt-5">{t('formats')}</div>
+      {formats.length ? (groupFormats(formats).length > 3 ? (
+        /* many sizes (RAK, Porcelanato): one row that scrolls sideways, the mouse wheel moves it too */
+        <div className="relative -mx-6">
+          <HScroll className="slim-scroll flex gap-6 overflow-x-auto px-6 pb-3 text-[13px]">
+            {groupFormats(formats).map((f, k) => {
+              const max = Math.max(...formats.map((x) => Math.max(x.w, x.l)), 1);
+              return (
+                <li key={k} className="flex shrink-0 flex-col items-start gap-2">
+                  <Slab w={f.w} l={f.l} t={Number(f.th[f.th.length - 1]) || 12} max={max} className="h-12 w-20" />
+                  <SizeLabel w={f.w} l={f.l} th={f.th} />
+                </li>
+              );
+            })}
+          </HScroll>
+          <span className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-ivory to-transparent" aria-hidden />
+        </div>
+      ) : (
+        <ul className="space-y-3 text-sm">
+          {groupFormats(formats).map((f, k) => {
+            const max = Math.max(...formats.map((x) => Math.max(x.w, x.l)), 1);
+            return (
+              <li key={k} className="flex items-center gap-4">
+                <Slab w={f.w} l={f.l} t={Number(f.th[f.th.length - 1]) || 12} max={max} className="h-12 w-20 shrink-0" />
+                <SizeLabel w={f.w} l={f.l} th={f.th} />
+              </li>
+            );
+          })}
+        </ul>
+      )) : <p className="text-sm text-warm">{t('customSizes')}</p>}
+      {/* examples: photos of this surface in this application (set per application in the admin) */}
+      {examples.length > 0 ? (
+        <>
+          <div className="eyebrow mb-3 mt-6">{t('examples')}</div>
+          <div className="grid grid-cols-3 gap-3">
+            {examples.map((m, k) => (
+              <div key={k} className="aspect-square overflow-hidden bg-stone"><img src={m.sm} alt={m.alt || ''} className="h-full w-full object-cover" loading="lazy" /></div>
+            ))}
+          </div>
+        </>
+      ) : colours.some((p) => p.cover && p.swatch?.sm !== p.cover.sm) && (
+        <>
+          <div className="eyebrow mb-3 mt-6">{t('examples')}</div>
+          <div className="grid grid-cols-3 gap-3">
+            {colours.filter((p) => p.cover && p.swatch?.sm !== p.cover.sm).slice(0, 6).map((p) => (
+              <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} className="block">
+                <div className="aspect-square overflow-hidden bg-stone"><img src={p.cover!.sm} alt="" className="h-full w-full object-cover" loading="lazy" /></div>
+                <div className="mt-1.5 truncate text-[11px]">{tr(p, 'name')}</div>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+      {/* colours: the slab of each colour, small, so many can be shown */}
+      {colours.length > 0 && (
+        <>
+          <div className="eyebrow mb-3 mt-6">{t('colours')}</div>
+          <div className="grid grid-cols-6 gap-2">
+            {colours.map((p) => (
+              <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} title={tr(p, 'name')} className="group/sw block">
+                <div className="aspect-square overflow-hidden bg-stone ring-charcoal/40 transition group-hover/sw:ring-1"><img src={(p.swatch || p.cover)?.sm} alt={tr(p, 'name')} className="h-full w-full object-cover" loading="lazy" /></div>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+      <button type="button" onClick={() => { setSheet(false); open({ type: 'product', categories: [c.id], applications: [app] }); }} className="ulink mt-6 text-[11px] font-medium uppercase tracking-wide2 text-bronze">{t('requestSample')} →</button>
+    </>
+  );
   return (
     <div className="group/cat relative">
       <Tile e={c} i={i} to={lp(`/materials/${c.slug}`)} aspect="aspect-[4/3]" label={tr(c, 'kind') || undefined} />
-      {(
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 hidden translate-y-2 opacity-0 transition-all duration-500 ease-lux group-hover/cat:pointer-events-auto group-hover/cat:translate-y-0 group-hover/cat:opacity-100 md:block">
-          <div className="max-h-[440px] overflow-y-auto border border-charcoal/10 bg-ivory p-6 shadow-[0_30px_70px_rgba(29,27,25,.18)]" data-lenis-prevent>
-            {tr(c, 'kind') && <div className="eyebrow mb-2">{tr(c, 'kind')}</div>}
-            <Link to={lp(`/materials/${c.slug}`)} className="font-display text-2xl">{tr(c, 'name')}</Link>
-            <div className="eyebrow mb-2 mt-5">{t('formats')}</div>
-            {formats.length ? (groupFormats(formats).length > 3 ? (
-              /* many sizes (RAK, Porcelanato): one row that scrolls sideways, the mouse wheel moves it too */
-              <div className="relative -mx-6">
-                <HScroll className="slim-scroll flex gap-6 overflow-x-auto px-6 pb-3 text-[13px]">
-                  {groupFormats(formats).map((f, k) => {
-                    const max = Math.max(...formats.map((x) => Math.max(x.w, x.l)), 1);
-                    return (
-                      <li key={k} className="flex shrink-0 flex-col items-start gap-2">
-                        <Slab w={f.w} l={f.l} t={Number(f.th[f.th.length - 1]) || 12} max={max} className="h-12 w-20" />
-                        <SizeLabel w={f.w} l={f.l} th={f.th} />
-                      </li>
-                    );
-                  })}
-                </HScroll>
-                <span className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-ivory to-transparent" aria-hidden />
-              </div>
-            ) : (
-              <ul className="space-y-3 text-sm">
-                {groupFormats(formats).map((f, k) => {
-                  const max = Math.max(...formats.map((x) => Math.max(x.w, x.l)), 1);
-                  return (
-                    <li key={k} className="flex items-center gap-4">
-                      <Slab w={f.w} l={f.l} t={Number(f.th[f.th.length - 1]) || 12} max={max} className="h-12 w-20 shrink-0" />
-                      <SizeLabel w={f.w} l={f.l} th={f.th} />
-                    </li>
-                  );
-                })}
-              </ul>
-            )) : <p className="text-sm text-warm">{t('customSizes')}</p>}
-            {/* examples: photos of this surface in this application (set per application in the admin) */}
-            {examples.length > 0 ? (
-              <>
-                <div className="eyebrow mb-3 mt-6">{t('examples')}</div>
-                <div className="grid grid-cols-3 gap-3">
-                  {examples.map((m, k) => (
-                    <div key={k} className="aspect-square overflow-hidden bg-stone"><img src={m.sm} alt={m.alt || ''} className="h-full w-full object-cover" loading="lazy" /></div>
-                  ))}
-                </div>
-              </>
-            ) : colours.some((p) => p.cover && p.swatch?.sm !== p.cover.sm) && (
-              <>
-                <div className="eyebrow mb-3 mt-6">{t('examples')}</div>
-                <div className="grid grid-cols-3 gap-3">
-                  {colours.filter((p) => p.cover && p.swatch?.sm !== p.cover.sm).slice(0, 6).map((p) => (
-                    <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} className="block">
-                      <div className="aspect-square overflow-hidden bg-stone"><img src={p.cover!.sm} alt="" className="h-full w-full object-cover" loading="lazy" /></div>
-                      <div className="mt-1.5 truncate text-[11px]">{tr(p, 'name')}</div>
-                    </Link>
-                  ))}
-                </div>
-              </>
-            )}
-            {/* colours: the slab of each colour, small, so many can be shown */}
-            {colours.length > 0 && (
-              <>
-                <div className="eyebrow mb-3 mt-6">{t('colours')}</div>
-                <div className="grid grid-cols-6 gap-2">
-                  {colours.map((p) => (
-                    <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} title={tr(p, 'name')} className="group/sw block">
-                      <div className="aspect-square overflow-hidden bg-stone ring-charcoal/40 transition group-hover/sw:ring-1"><img src={(p.swatch || p.cover)?.sm} alt={tr(p, 'name')} className="h-full w-full object-cover" loading="lazy" /></div>
-                    </Link>
-                  ))}
-                </div>
-              </>
-            )}
-            <button type="button" onClick={() => open({ type: 'product', categories: [c.id], applications: [app] })} className="ulink mt-6 text-[11px] font-medium uppercase tracking-wide2 text-bronze">{t('requestSample')} →</button>
-          </div>
+      <button type="button" onClick={() => setSheet(true)} className="mt-4 flex items-center gap-2 border border-charcoal/20 px-4 py-2.5 text-[11px] font-medium uppercase tracking-wide2 md:hidden">
+        <span className="flex -space-x-1.5">{colours.slice(0, 4).map((p) => <img key={p.id} src={(p.swatch || p.cover)?.sm} alt="" className="h-5 w-5 rounded-full border border-ivory object-cover" />)}</span>
+        {t('examples')} · {t('colours')} <span aria-hidden>+</span>
+      </button>
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 hidden translate-y-2 opacity-0 transition-all duration-500 ease-lux group-hover/cat:pointer-events-auto group-hover/cat:translate-y-0 group-hover/cat:opacity-100 md:block">
+        <div className="max-h-[440px] overflow-y-auto border border-charcoal/10 bg-ivory p-6 shadow-[0_30px_70px_rgba(29,27,25,.18)]" data-lenis-prevent>
+          {body}
         </div>
-      )}
+      </div>
+      <div className={`fixed inset-0 z-[90] md:hidden ${sheet ? '' : 'pointer-events-none'}`} aria-hidden={!sheet}>
+        <div onClick={() => setSheet(false)} className={`absolute inset-0 bg-ink/50 transition-opacity duration-300 ${sheet ? 'opacity-100' : 'opacity-0'}`} />
+        <div role="dialog" aria-modal="true" aria-label={tr(c, 'name')}
+          className={`absolute inset-x-0 bottom-0 flex max-h-[88svh] flex-col bg-ivory transition-transform duration-500 ease-lux ${sheet ? 'translate-y-0' : 'translate-y-full'}`}>
+          <div className="flex justify-end border-b border-charcoal/10 px-3 py-2">
+            <button onClick={() => setSheet(false)} aria-label={t('close')} className="grid h-10 w-10 place-items-center text-2xl leading-none">×</button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-5 pb-8 pt-4" data-lenis-prevent>{body}</div>
+        </div>
+      </div>
     </div>
   );
 }
