@@ -683,7 +683,19 @@ async function batch19() {
   }
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15, 'fb-16': batch16, 'fb-17': batch17, 'fb-18': batch18, 'fb-19': batch19 };
+// Batch 20: homepage without "Surfaces with character", and Applications before Materials
+async function batch20() {
+  const row = await one(`SELECT value FROM settings WHERE key='home'`);
+  if (!row) return;
+  const h = typeof row.value === 'string' ? JSON.parse(row.value) : row.value;
+  const sec = (h.sections || []).map((x) => (x.key === 'showcase' ? { ...x, visible: false } : x));
+  const a = sec.findIndex((x) => x.key === 'materials'), b = sec.findIndex((x) => x.key === 'applications');
+  if (a > -1 && b > -1) [sec[a], sec[b]] = [sec[b], sec[a]];
+  h.sections = sec;
+  await q(`UPDATE settings SET value=$1, updated_at=NOW() WHERE key='home'`, [JSON.stringify(h)]);
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15, 'fb-16': batch16, 'fb-17': batch17, 'fb-18': batch18, 'fb-19': batch19, 'fb-20': batch20 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);
