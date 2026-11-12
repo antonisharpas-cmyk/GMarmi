@@ -59,6 +59,12 @@ r.get('/site', async (_req, res) => {
   const fp = (home.featured_products || []);
   const prods = fp.length ? await hydrate(await q(`SELECT * FROM entries WHERE id IN (SELECT value FROM json_each($1)) AND published`, [fp])) : [];
   homeR.featured_products = fp.map((id) => prods.find((p) => p.id === id)).filter(Boolean);
+  // photos of each surface in every application, so the surface pages show the same spaces as the applications
+  const ex = applications.flatMap((a) => Object.entries(a.category_examples || {}).flatMap(([cid, ids]) => (ids || []).map((m) => ({ cid: Number(cid), m, a }))));
+  const exm = await mediaMap([...new Set(ex.map((x) => x.m).filter(Number.isInteger))]);
+  for (const c of categories) {
+    c.examples = ex.filter((x) => x.cid === c.id && exm[x.m]).map((x) => ({ ...exm[x.m], app: { id: x.a.id, slug: x.a.slug, name_en: x.a.name_en, name_el: x.a.name_el } }));
+  }
   res.set('Cache-Control', 'no-cache');
   res.json({ site: await resolveSettingImages(site), home: homeR, about: await resolveSettingImages(about), seo, categories, applications, brands });
 });
@@ -96,10 +102,11 @@ r.get('/entries/:type/:slug', async (req, res) => {
     // the swatch of a colour is its slab photo: an image named "swatch", otherwise its last photo
     const swatch = (p) => (p.gallery || []).find((g) => /swatch/i.test(g.lg || '')) || (p.gallery || [])[(p.gallery || []).length - 1] || p.cover;
     related.categories = (item.category_ids || []).map((id) => cats.find((c) => c.id === id)).filter(Boolean).map((c) => {
-      // colours shown in the hover card: those linked to this application, otherwise the whole category
+      // colours shown in the hover card
       const inCat = products.filter((p) => p.category_id === c.id);
       const mine = inCat.filter((p) => linked.some((l) => l.id === p.id));
-      const list = mine.length ? mine : inCat;
+      // every colour of the surface, those linked to this application first
+      const list = [...mine, ...inCat.filter((p) => !mine.includes(p))];
       return { ...c, cover: cim[ci[c.id]] || c.cover, examples: (ce[c.id] || []).map((m) => cim[m]).filter(Boolean), colours: list.map((p) => ({ id: p.id, slug: p.slug, name_en: p.name_en, name_el: p.name_el, cover: p.cover, swatch: swatch(p) })) };
     });
     related.products = products.filter((p) => (item.product_ids || []).includes(p.id) || (p.application_ids || []).includes(item.id));

@@ -59,18 +59,25 @@ export function Carousel({ children, item, gap = 24, every = 2000 }: { children:
 export const swatchOf = (p: Entry): Img | null => (p.gallery || []).find((g: Img) => /swatch/i.test(g.lg || '')) || (p.gallery || [])[(p.gallery || []).length - 1] || p.cover || null;
 
 /** The materials of one surface in two moving rows: photos in real spaces, then the colours */
-export function MaterialRows({ items }: { items: Entry[] }) {
+export function MaterialRows({ items, cat, app }: { items: Entry[]; cat?: Entry | null; app?: string | null }) {
   const s = useSite();
   const { lp, tr, t } = useLang();
   const spaces = items.filter((p) => p.cover && swatchOf(p)?.lg !== p.cover.lg);
+  // the same photos shown in the applications, each one labelled and linked to its application
+  const examples: any[] = ((cat?.examples || []) as any[]).filter((x) => !app || x.app.slug === app).filter((x, i, a) => a.findIndex((y) => y.lg === x.lg) === i);
   return (
     <div className="space-y-12">
-      {spaces.length > 0 && (
+      {examples.length + spaces.length > 0 && (
         <Carousel item="w-[85%] sm:w-[calc((100%-24px)/2)] lg:w-[calc((100%-48px)/3)]">
-          {spaces.map((p, i) => {
-            const brand = s?.brands.find((b) => b.id === p.brand_id);
-            return <Tile key={p.id} e={p} i={i % 3} to={lp(productPath(p, s?.categories))} label={brand ? tr(brand, 'name') : undefined} cursor="view" />;
-          })}
+          {[
+            ...examples.map((x, i) => (
+              <Tile key={`x${i}`} e={{ id: -i, cover: x, name_en: x.app.name_en, name_el: x.app.name_el } as unknown as Entry} i={i % 3} to={lp(`/applications/${x.app.slug}`)} aspect="aspect-[4/3]" label={t('applications')} cursor="explore" />
+            )),
+            ...spaces.map((p, i) => {
+              const brand = s?.brands.find((b) => b.id === p.brand_id);
+              return <Tile key={p.id} e={p} i={i % 3} to={lp(productPath(p, s?.categories))} aspect="aspect-[4/3]" label={brand ? tr(brand, 'name') : undefined} cursor="view" />;
+            }),
+          ]}
         </Carousel>
       )}
       <div>

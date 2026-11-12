@@ -71,7 +71,7 @@ export default function Materials() {
           <SlabFormats formats={category.formats || []} custom={category.custom_sizes} />
         </>
       ) : (
-        <PageHero imgs={s.categories.map((c) => c.cover)} eyebrow={t('materials')} title={lang === 'el' ? 'Η συλλογή υλικών' : 'The material collection'} intro={tr(s.seo, 'desc')} />
+        <PageHero imgs={s.categories.map((c) => c.cover)} eyebrow={t('materials')} title={lang === 'el' ? 'Η συλλογή επιφανειών' : 'The surface collection'} intro={tr(s.seo, 'desc')} />
       )}
 
       <section className="wrap pb-32 pt-14">
@@ -139,7 +139,7 @@ export default function Materials() {
           </div>
         </div>
 
-        {!products ? <Loading /> : filtered.length ? (category ? <MaterialRows items={filtered} /> : (
+        {!products ? <Loading /> : filtered.length ? (category ? <MaterialRows items={filtered} cat={category} app={sp.get('application')} /> : (
           <div className="space-y-24">
             {groups.map(({ c, items }) => (
               <div key={c?.id || 'other'}>
@@ -150,7 +150,7 @@ export default function Materials() {
                   </div>
                   {c && <Link to={lp(`/materials/${c.slug}`)} className="ulink shrink-0 text-[11px] uppercase tracking-wide2">{t('viewAll')} →</Link>}
                 </div>
-                <MaterialRows items={items} />
+                <MaterialRows items={items} cat={c} app={sp.get('application')} />
               </div>
             ))}
           </div>

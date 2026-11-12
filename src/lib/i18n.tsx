@@ -5,15 +5,15 @@ export type Lang = 'en' | 'el';
 
 const S = {
   en: {
-    group: 'Group of companies', groupCompanies: 'Companies of the group', colours: 'Colours', examples: 'Examples', requestSample: 'Request a catalogue for more colours', surfaces: 'Surface type', prev: 'Previous', next: 'Next', groupTitle: 'One group, many spaces', visitSite: 'Visit website', formats: 'Formats', customSizes: 'Cut to any size, to fit your project.', materialsFor: 'Surfaces for this application', partners: 'Our partners', since: 'Since', founder: 'The founder', home: 'Home', materials: 'Materials', applications: 'Applications',
+    group: 'Group of companies', groupCompanies: 'Companies of the group', colours: 'Colours', examples: 'Examples', requestSample: 'Request a catalogue for more colours', surfaces: 'Surface type', prev: 'Previous', next: 'Next', groupTitle: 'One group, many spaces', visitSite: 'Visit website', formats: 'Formats', customSizes: 'Cut to any size, to fit your project.', materialsFor: 'Surfaces for this application', partners: 'Our partners', since: 'Since', founder: 'The founder', home: 'Home', materials: 'Surfaces', applications: 'Applications',
     about: 'About us', contact: 'Contact', enquire: 'Enquire', faq: 'FAQ', menu: 'Menu', close: 'Close',
-    explore: 'Explore', view: 'View', allMaterials: 'All materials', viewAll: 'View all', discover: 'Discover',
+    explore: 'Explore', view: 'View', allMaterials: 'All surfaces', viewAll: 'View all', discover: 'Discover',
     requestInfo: 'Request information', requestQuote: 'Request a quote',
     overview: 'Overview', specifications: 'Specifications', gallery: 'Gallery', features: 'Highlights',
     material: 'Material', brand: 'Brand', finish: 'Finish', thickness: 'Thickness',
     dimensions: 'Slab dimensions', colour: 'Colour', category: 'Category',
     relatedMaterials: 'Related materials', usedIn: 'Applications',
-    filters: 'Filters', apply: 'Apply', clear: 'Clear', all: 'All', results: 'materials', noResults: 'No materials match these filters.',
+    filters: 'Filters', apply: 'Apply', clear: 'Clear', all: 'All', results: 'colours', noResults: 'No materials match these filters.',
     comingSoon: 'This section is being prepared. Contact us for the full range available in our showroom.',
    
     enquireMaterial: 'Enquire about this material',
@@ -44,15 +44,15 @@ const S = {
     fq_materials: 'Materials', fq_products: 'Products', fq_orders: 'Orders', fq_showroom: 'Showroom', fq_general: 'General',
   },
   el: {
-    group: 'Ο Όμιλος', groupCompanies: 'Οι εταιρείες του ομίλου', colours: 'Χρώματα', examples: 'Παραδείγματα', requestSample: 'Ζητήστε κατάλογο για περισσότερα χρώματα', surfaces: 'Είδος επιφάνειας', prev: 'Προηγούμενο', next: 'Επόμενο', groupTitle: 'Ένας όμιλος, πολλοί χώροι', visitSite: 'Επισκεφθείτε την ιστοσελίδα', formats: 'Διαστάσεις', customSizes: 'Κοπή σε οποιαδήποτε διάσταση, ανάλογα με το έργο σας.', materialsFor: 'Επιφάνειες για αυτή την εφαρμογή', partners: 'Οι συνεργάτες μας', since: 'Από το', founder: 'Ο ιδρυτής', home: 'Αρχική', materials: 'Υλικά', applications: 'Εφαρμογές',
+    group: 'Ο Όμιλος', groupCompanies: 'Οι εταιρείες του ομίλου', colours: 'Χρώματα', examples: 'Παραδείγματα', requestSample: 'Ζητήστε κατάλογο για περισσότερα χρώματα', surfaces: 'Είδος επιφάνειας', prev: 'Προηγούμενο', next: 'Επόμενο', groupTitle: 'Ένας όμιλος, πολλοί χώροι', visitSite: 'Επισκεφθείτε την ιστοσελίδα', formats: 'Διαστάσεις', customSizes: 'Κοπή σε οποιαδήποτε διάσταση, ανάλογα με το έργο σας.', materialsFor: 'Επιφάνειες για αυτή την εφαρμογή', partners: 'Οι συνεργάτες μας', since: 'Από το', founder: 'Ο ιδρυτής', home: 'Αρχική', materials: 'Επιφάνειες', applications: 'Εφαρμογές',
     about: 'Η Εταιρεία', contact: 'Επικοινωνία', enquire: 'Αίτημα', faq: 'Συχνές Ερωτήσεις', menu: 'Μενού', close: 'Κλείσιμο',
-    explore: 'Δείτε', view: 'Προβολή', allMaterials: 'Όλα τα υλικά', viewAll: 'Δείτε όλα', discover: 'Ανακαλύψτε',
+    explore: 'Δείτε', view: 'Προβολή', allMaterials: 'Όλες οι επιφάνειες', viewAll: 'Δείτε όλα', discover: 'Ανακαλύψτε',
     requestInfo: 'Ζητήστε πληροφορίες', requestQuote: 'Ζητήστε προσφορά',
     overview: 'Περιγραφή', specifications: 'Προδιαγραφές', gallery: 'Γκαλερί', features: 'Χαρακτηριστικά',
     material: 'Υλικό', brand: 'Brand', finish: 'Φινίρισμα', thickness: 'Πάχος',
     dimensions: 'Διαστάσεις πλάκας', colour: 'Χρώμα', category: 'Κατηγορία',
-    relatedMaterials: 'Σχετικά υλικά', usedIn: 'Εφαρμογές',
-    filters: 'Φίλτρα', apply: 'Εφαρμογή', clear: 'Καθαρισμός', all: 'Όλα', results: 'υλικά', noResults: 'Δεν βρέθηκαν υλικά με αυτά τα φίλτρα.',
+    relatedMaterials: 'Σχετικές επιφάνειες', usedIn: 'Εφαρμογές',
+    filters: 'Φίλτρα', apply: 'Εφαρμογή', clear: 'Καθαρισμός', all: 'Όλα', results: 'χρώματα', noResults: 'Δεν βρέθηκαν υλικά με αυτά τα φίλτρα.',
     comingSoon: 'Η ενότητα ετοιμάζεται. Επικοινωνήστε μαζί μας για όλη τη γκάμα του εκθεσιακού μας χώρου.',
    
     enquireMaterial: 'Ρωτήστε για αυτό το υλικό',
@@ -109,5 +109,6 @@ export function switchPath(pathname: string, to: Lang) {
 
 // Greek is the default language. The visitor's choice is remembered once they pick EN or GR.
 const LANG_KEY = 'gm_lang';
-export function saveLang(l: Lang) { try { localStorage.setItem(LANG_KEY, l); } catch { /* ignore */ } }
-export function savedLang(): Lang | null { try { const v = localStorage.getItem(LANG_KEY); return v === 'en' || v === 'el' ? v : null; } catch { return null; } }
+// the choice lasts for the visit only, so every new visit opens in Greek
+export function saveLang(l: Lang) { try { sessionStorage.setItem(LANG_KEY, l); } catch { /* ignore */ } }
+export function savedLang(): Lang | null { try { const v = sessionStorage.getItem(LANG_KEY); return v === 'en' || v === 'el' ? v : null; } catch { return null; } }

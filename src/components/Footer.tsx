@@ -24,7 +24,7 @@ export default function Footer() {
           <div className="lg:col-span-3">
             <div className="eyebrow mb-6 text-taupe">{t('explore2')}</div>
             <ul className="space-y-3 text-sm">
-              {[['/materials', t('materials')], ['/applications', t('applications')], ['/about', t('about')], ['/faq', t('faq')]].map(([p, l]) => (
+              {[['/applications', t('applications')], ['/materials', t('materials')], ['/about', t('about')], ['/faq', t('faq')]].map(([p, l]) => (
                 <li key={p}><Link to={lp(p)} className="ulink hover:text-ivory">{l}</Link></li>
               ))}
             </ul>

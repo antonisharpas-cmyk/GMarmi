@@ -88,7 +88,8 @@ export default function App() {
       </Suspense>
     );
   }
-  // the homepage opens in Greek unless the visitor chose English before
-  if (pathname === '/' && savedLang() !== 'en') return <Navigate to={`/el${search}`} replace />;
+  // Greek is the default language: every page opens in Greek unless the visitor chose English in this visit
+  const el = pathname === '/el' || pathname.startsWith('/el/');
+  if (!el && savedLang() !== 'en') return <Navigate to={`/el${pathname === '/' ? '' : pathname}${search}`} replace />;
   return <Site />;
 }

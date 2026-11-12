@@ -4,6 +4,8 @@
 
 @layer base {
   html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  /* reveal animations start slightly off to the side; never let them create a sideways scroll */
+  html, body { overflow-x: clip; }
   html.lenis, html.lenis body { height: auto; }
   .lenis.lenis-smooth { scroll-behavior: auto !important; }
   body { @apply bg-ivory text-charcoal font-sans; font-feature-settings: 'ss01'; }
