@@ -90,7 +90,9 @@ r.get('/entries/:type/:slug', async (req, res) => {
     const linked = products.filter((p) => (item.product_ids || []).includes(p.id) || (p.application_ids || []).includes(item.id));
     // optional photo of each surface for this application (set in the admin), otherwise the category photo
     const ci = item.category_images || {};
-    const cim = await mediaMap(Object.values(ci).filter(Number.isInteger));
+    // photos of each surface used in this application (several per surface), shown as examples in the hover card
+    const ce = item.category_examples || {};
+    const cim = await mediaMap([...Object.values(ci), ...Object.values(ce).flat()].filter(Number.isInteger));
     // the swatch of a colour is its slab photo: an image named "swatch", otherwise its last photo
     const swatch = (p) => (p.gallery || []).find((g) => /swatch/i.test(g.lg || '')) || (p.gallery || [])[(p.gallery || []).length - 1] || p.cover;
     related.categories = (item.category_ids || []).map((id) => cats.find((c) => c.id === id)).filter(Boolean).map((c) => {
@@ -98,7 +100,7 @@ r.get('/entries/:type/:slug', async (req, res) => {
       const inCat = products.filter((p) => p.category_id === c.id);
       const mine = inCat.filter((p) => linked.some((l) => l.id === p.id));
       const list = mine.length ? mine : inCat;
-      return { ...c, cover: cim[ci[c.id]] || c.cover, colours: list.map((p) => ({ id: p.id, slug: p.slug, name_en: p.name_en, name_el: p.name_el, cover: p.cover, swatch: swatch(p) })) };
+      return { ...c, cover: cim[ci[c.id]] || c.cover, examples: (ce[c.id] || []).map((m) => cim[m]).filter(Boolean), colours: list.map((p) => ({ id: p.id, slug: p.slug, name_en: p.name_en, name_el: p.name_el, cover: p.cover, swatch: swatch(p) })) };
     });
     related.products = products.filter((p) => (item.product_ids || []).includes(p.id) || (p.application_ids || []).includes(item.id));
   }
@@ -138,7 +140,7 @@ export async function createEnquiry(d, file) {
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id, ref, name, company, email, phone, enquiry_type, product_name, project_type, message, attachment_name, lang`,
     [ref, d.name.slice(0, 200), (d.company || '').slice(0, 200), d.email.slice(0, 200), (d.phone || '').slice(0, 60),
       TYPES_ENQ.includes(d.enquiry_type) ? d.enquiry_type : 'general', d.product_id ? Number(d.product_id) : null,
-      productName || (d.product_name || '').slice(0, 200), (d.project_type || '').slice(0, 120), (d.message || '').slice(0, 5000),
+      productName || (d.product_name || '').slice(0, 300), (d.project_type || '').slice(0, 300), (d.message || '').slice(0, 5000),
       file?.originalname || null, file?.mimetype || null, file?.buffer || null, d.source || 'form', d.lang === 'el' ? 'el' : 'en']
   );
   const base = process.env.PUBLIC_URL || '';

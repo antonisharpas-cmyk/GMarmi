@@ -1,27 +1,36 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../lib/i18n';
-import { useApi } from '../lib/site';
+import { useSite } from '../lib/site';
 import { track } from '../lib/api';
 import Select from './Select';
+import MultiSelect from './MultiSelect';
 import type { Entry } from '../lib/types';
 
 const TYPES = ['general', 'product', 'quote', 'project', 'showroom', 'architect', 'other'] as const;
-const PROJECTS = ['kitchen', 'bathroom', 'flooring', 'walls', 'stairs', 'commercial', 'outdoor', 'otherp'] as const;
 
-export default function EnquiryForm({ productId, defaultType, onDone }: { productId?: number; defaultType?: string; onDone?: () => void }) {
+export default function EnquiryForm({ productId, defaultType, categories = [], applications = [], onDone }: { productId?: number; defaultType?: string; categories?: number[]; applications?: number[]; onDone?: () => void }) {
   const { t, lp, tr, lang } = useLang();
-  const { data: products } = useApi<Entry[]>('/api/entries/product');
+  const s = useSite();
   const started = useRef(Date.now());
   const [f, setF] = useState({
     name: '', company: '', email: '', phone: '',
-    enquiry_type: defaultType || (productId ? 'product' : 'general'),
-    product_id: productId ? String(productId) : '', project_type: '', message: '', consent: false, website: '',
+    enquiry_type: defaultType || (productId || categories.length || applications.length ? 'product' : 'general'),
+    product_id: productId ? String(productId) : '', message: '', consent: false, website: '',
   });
   const [file, setFile] = useState<File | null>(null);
   const [state, setState] = useState<{ busy: boolean; error: string; ref: string }>({ busy: false, error: '', ref: '' });
   const set = (k: string) => (v: any) => setF((s) => ({ ...s, [k]: v }));
-  const productOptions = useMemo(() => [{ value: '', label: t('select') }, ...(products || []).map((p) => ({ value: String(p.id), label: tr(p, 'name') }))], [products, tr, t]);
+  // application first, then the surfaces offered for the chosen applications (all surfaces when none is chosen)
+  const [apps, setApps] = useState<string[]>(applications.map(String));
+  const [cats, setCats] = useState<string[]>(categories.map(String));
+  const appOptions = useMemo(() => (s?.applications || []).map((a) => ({ value: String(a.id), label: tr(a, 'name') })), [s, tr]);
+  const catOptions = useMemo(() => {
+    const allowed = new Set((s?.applications || []).filter((a) => apps.includes(String(a.id))).flatMap((a: Entry) => (a.category_ids || []).map(String)));
+    return (s?.categories || []).filter((c) => !apps.length || allowed.has(String(c.id))).map((c) => ({ value: String(c.id), label: tr(c, 'name') }));
+  }, [s, apps, tr]);
+  useEffect(() => { setCats((cur) => cur.filter((x) => catOptions.some((o) => o.value === x))); }, [catOptions]);
+  const names = (ids: string[], list: Entry[] = []) => ids.map((id) => list.find((x) => String(x.id) === id)?.name_en).filter(Boolean).join(', ');
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +41,8 @@ export default function EnquiryForm({ productId, defaultType, onDone }: { produc
     setState({ busy: true, error: '', ref: '' });
     const fd = new FormData();
     Object.entries(f).forEach(([k, v]) => fd.append(k, String(v)));
+    fd.append('project_type', names(apps, s?.applications));
+    if (!productId) fd.append('product_name', names(cats, s?.categories));
     fd.append('lang', lang);
     fd.append('started', String(started.current));
     fd.append('source', productId ? 'product' : 'form');
@@ -68,12 +79,12 @@ export default function EnquiryForm({ productId, defaultType, onDone }: { produc
       <div><label className="label" htmlFor="ef-company">{t('company')} <span className="normal-case tracking-normal text-taupe">({t('optional')})</span></label><input id="ef-company" className="field" value={f.company} onChange={(e) => set('company')(e.target.value)} autoComplete="organization" /></div>
       <div><label className="label" htmlFor="ef-email">{t('email')} *</label><input id="ef-email" type="email" className="field" value={f.email} onChange={(e) => set('email')(e.target.value)} autoComplete="email" required /></div>
       <div><label className="label" htmlFor="ef-phone">{t('phone')}</label><input id="ef-phone" type="tel" className="field" value={f.phone} onChange={(e) => set('phone')(e.target.value)} autoComplete="tel" /></div>
-      <div><label className="label" htmlFor="ef-type">{t('enquiryType')}</label>
+      <div className="sm:col-span-2"><label className="label" htmlFor="ef-type">{t('enquiryType')}</label>
         <Select id="ef-type" value={f.enquiry_type} onChange={set('enquiry_type')} options={TYPES.map((x) => ({ value: x, label: t(`t_${x}` as any) }))} /></div>
-      <div><label className="label" htmlFor="ef-product">{t('product')}</label>
-        <Select id="ef-product" value={f.product_id} onChange={set('product_id')} options={productOptions} placeholder={t('select')} /></div>
       <div className="sm:col-span-2"><label className="label" htmlFor="ef-project">{t('projectType')}</label>
-        <Select id="ef-project" value={f.project_type} onChange={set('project_type')} placeholder={t('select')} options={PROJECTS.map((x) => ({ value: t(`p_${x}` as any), label: t(`p_${x}` as any) }))} /></div>
+        <MultiSelect id="ef-project" value={apps} onChange={setApps} options={appOptions} placeholder={t('select')} /></div>
+      <div className="sm:col-span-2"><label className="label" htmlFor="ef-surfaces">{t('surfaces')}</label>
+        <MultiSelect id="ef-surfaces" value={cats} onChange={setCats} options={catOptions} placeholder={t('select')} /></div>
       <div className="sm:col-span-2"><label className="label" htmlFor="ef-msg">{t('message')} *</label>
         <textarea id="ef-msg" rows={4} className="field resize-none" value={f.message} onChange={(e) => set('message')(e.target.value)} required /></div>
       <div className="sm:col-span-2">

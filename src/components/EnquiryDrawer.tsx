@@ -4,7 +4,7 @@ import { scrollLock } from '../lib/motion';
 import EnquiryForm from './EnquiryForm';
 import type { Entry } from '../lib/types';
 
-type Opts = { product?: Entry; type?: string };
+type Opts = { product?: Entry; type?: string; categories?: number[]; applications?: number[] };
 const Ctx = createContext<{ open: (o?: Opts) => void }>({ open: () => {} });
 export const useEnquiry = () => useContext(Ctx);
 
@@ -38,7 +38,8 @@ export function EnquiryProvider({ children }: { children: React.ReactNode }) {
               </div>
             )}
             {!opts?.product && <h2 className="h-md mb-10">{t('getInTouch')}</h2>}
-            {opts && <EnquiryForm key={opts.product?.id || 'g'} productId={opts.product?.id} defaultType={opts.type} onDone={close} />}
+            {opts && <EnquiryForm key={`${opts.product?.id || 'g'}-${(opts.categories || []).join()}-${(opts.applications || []).join()}`} productId={opts.product?.id} defaultType={opts.type}
+              categories={opts.categories || (opts.product?.category_id ? [opts.product.category_id] : [])} applications={opts.applications || opts.product?.application_ids || []} onDone={close} />}
           </div>
         </aside>
       </div>

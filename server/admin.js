@@ -70,9 +70,11 @@ r.get('/entries/:type/:id', can('content'), async (req, res) => {
   if (!row) return res.status(404).json({ error: 'Not found' });
   const [h] = await hydrate([row]);
   const ci = row.data?.category_images || {};
-  const mm = await mediaMap(Object.values(ci).filter(Number.isInteger));
+  const ce = row.data?.category_examples || {};
+  const mm = await mediaMap([...Object.values(ci), ...Object.values(ce).flat()].filter(Number.isInteger));
   const cat_imgs = Object.fromEntries(Object.entries(ci).map(([k, v]) => [k, mm[v] || null]));
-  res.json({ ...row, gallery: h.gallery, cat_imgs });
+  const cat_gals = Object.fromEntries(Object.entries(ce).map(([k, v]) => [k, (v || []).map((m) => mm[m]).filter(Boolean)]));
+  res.json({ ...row, gallery: h.gallery, cat_imgs, cat_gals });
 });
 
 async function uniqueSlug(type, slug, id = 0) {

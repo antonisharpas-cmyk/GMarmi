@@ -651,7 +651,39 @@ async function batch18() {
   }
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15, 'fb-16': batch16, 'fb-17': batch17, 'fb-18': batch18 };
+// Batch 19: several photos of each surface in each application (shown in the hover card),
+// and the first one becomes the tile photo of that surface where none is set yet
+async function batch19() {
+  const cats = { mytop: 'mytop-fondovalle', rak: 'rak-ceramics', quartz: 'quartz', granite: 'natural-granite', marble: 'natural-marble' };
+  const label = { mytop: 'MY TOP', rak: 'RAK Maximus', quartz: 'Quartz', granite: 'Granite', marble: 'Natural marble' };
+  const plan = {
+    kitchens: { mytop: 3, rak: 3, quartz: 3, granite: 3 },
+    bathrooms: { mytop: 3, rak: 3, quartz: 3, granite: 1 },
+    'countertops-islands': { mytop: 3, rak: 3, quartz: 3, granite: 3 },
+    'wall-cladding': { mytop: 3, rak: 3 },
+    staircases: { mytop: 1, rak: 2, quartz: 3, marble: 3 },
+    hospitality: { mytop: 3, rak: 3, quartz: 2 },
+    pools: { marble: 3 },
+  };
+  for (const [app, list] of Object.entries(plan)) {
+    const row = await one(`SELECT id, data FROM entries WHERE type='application' AND slug=$1`, [app]);
+    if (!row) continue;
+    const data = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
+    const ci = { ...(data.category_images || {}) };
+    const ce = { ...(data.category_examples || {}) };
+    for (const [key, n] of Object.entries(list)) {
+      const cid = await idOf('category', cats[key]);
+      if (!cid || ce[cid]?.length) continue;
+      const ids = [];
+      for (let i = 1; i <= n; i++) ids.push(await media(`ex-${app}-${key}-${i}`, `${label[key]}, ${app.replace(/-/g, ' ')}`));
+      if (ci[cid]) ids.push(ci[cid]); else ci[cid] = ids[0];
+      ce[cid] = ids;
+    }
+    await q(`UPDATE entries SET data = json_set(json_set(data, '$.category_images', json($2)), '$.category_examples', json($3)), updated_at=NOW() WHERE id=$1`, [row.id, JSON.stringify(ci), JSON.stringify(ce)]);
+  }
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15, 'fb-16': batch16, 'fb-17': batch17, 'fb-18': batch18, 'fb-19': batch19 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);

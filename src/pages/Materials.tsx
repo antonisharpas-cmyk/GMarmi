@@ -4,7 +4,8 @@ import { useLang } from '../lib/i18n';
 import { useApi, useSite } from '../lib/site';
 import { track } from '../lib/api';
 import { scrollLock } from '../lib/motion';
-import { PageHero, PageTitle, ProductGrid, Loading, useTitle } from '../components/ui';
+import { PageHero, PageTitle, Loading, useTitle } from '../components/ui';
+import { MaterialRows } from '../components/Carousel';
 import Select from '../components/Select';
 import { FadeUp } from '../components/Reveal';
 import { useEnquiry } from '../components/EnquiryDrawer';
@@ -138,7 +139,7 @@ export default function Materials() {
           </div>
         </div>
 
-        {!products ? <Loading /> : filtered.length ? (category ? <ProductGrid items={filtered} /> : (
+        {!products ? <Loading /> : filtered.length ? (category ? <MaterialRows items={filtered} /> : (
           <div className="space-y-24">
             {groups.map(({ c, items }) => (
               <div key={c?.id || 'other'}>
@@ -149,7 +150,7 @@ export default function Materials() {
                   </div>
                   {c && <Link to={lp(`/materials/${c.slug}`)} className="ulink shrink-0 text-[11px] uppercase tracking-wide2">{t('viewAll')} →</Link>}
                 </div>
-                <ProductGrid items={items} />
+                <MaterialRows items={items} />
               </div>
             ))}
           </div>

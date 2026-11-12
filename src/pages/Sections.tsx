@@ -66,12 +66,13 @@ function HScroll({ className, children }: { className: string; children: React.R
 }
 
 /** Category tile; on desktop hover a card shows its sizes and the colours available for this application */
-function CategoryCard({ c, i }: { c: Entry; i: number }) {
+function CategoryCard({ c, i, app }: { c: Entry; i: number; app: number }) {
   const { t, tr, lp } = useLang();
   const { open } = useEnquiry();
   const s = useSite();
   const formats: { t: string; w: number; l: number }[] = c.formats || [];
   const colours: Entry[] = c.colours || [];
+  const examples: { sm: string; alt?: string }[] = c.examples || [];
   return (
     <div className="group/cat relative">
       <Tile e={c} i={i} to={lp(`/materials/${c.slug}`)} aspect="aspect-[4/3]" label={tr(c, 'kind') || undefined} />
@@ -110,34 +111,43 @@ function CategoryCard({ c, i }: { c: Entry; i: number }) {
                 })}
               </ul>
             )) : <p className="text-sm text-warm">{t('customSizes')}</p>}
-            {colours.length > 0 && (
+            {/* examples: photos of this surface in this application (set per application in the admin) */}
+            {examples.length > 0 ? (
               <>
-                {/* examples: each colour shown in a real space */}
                 <div className="eyebrow mb-3 mt-6">{t('examples')}</div>
                 <div className="grid grid-cols-3 gap-3">
-                  {colours.map((p) => (
+                  {examples.map((m, k) => (
+                    <div key={k} className="aspect-square overflow-hidden bg-stone"><img src={m.sm} alt={m.alt || ''} className="h-full w-full object-cover" loading="lazy" /></div>
+                  ))}
+                </div>
+              </>
+            ) : colours.some((p) => p.cover && p.swatch?.sm !== p.cover.sm) && (
+              <>
+                <div className="eyebrow mb-3 mt-6">{t('examples')}</div>
+                <div className="grid grid-cols-3 gap-3">
+                  {colours.filter((p) => p.cover && p.swatch?.sm !== p.cover.sm).slice(0, 6).map((p) => (
                     <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} className="block">
-                      <div className="aspect-square overflow-hidden bg-stone">{p.cover && <img src={p.cover.sm} alt="" className="h-full w-full object-cover" loading="lazy" />}</div>
+                      <div className="aspect-square overflow-hidden bg-stone"><img src={p.cover!.sm} alt="" className="h-full w-full object-cover" loading="lazy" /></div>
                       <div className="mt-1.5 truncate text-[11px]">{tr(p, 'name')}</div>
                     </Link>
                   ))}
                 </div>
-                {/* colours: the slab of each colour, small, so many can be shown */}
-                {colours.some((p) => p.swatch && p.swatch.sm !== p.cover?.sm) && (
-                  <>
-                    <div className="eyebrow mb-3 mt-6">{t('colours')}</div>
-                    <div className="grid grid-cols-6 gap-2">
-                      {colours.filter((p) => p.swatch && p.swatch.sm !== p.cover?.sm).map((p) => (
-                        <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} title={tr(p, 'name')} className="group/sw block">
-                          <div className="aspect-square overflow-hidden bg-stone ring-charcoal/40 transition group-hover/sw:ring-1"><img src={p.swatch.sm} alt={tr(p, 'name')} className="h-full w-full object-cover" loading="lazy" /></div>
-                        </Link>
-                      ))}
-                    </div>
-                  </>
-                )}
               </>
             )}
-            <button type="button" onClick={() => open({ type: 'product' })} className="ulink mt-6 text-[11px] font-medium uppercase tracking-wide2 text-bronze">{t('requestSample')} →</button>
+            {/* colours: the slab of each colour, small, so many can be shown */}
+            {colours.length > 0 && (
+              <>
+                <div className="eyebrow mb-3 mt-6">{t('colours')}</div>
+                <div className="grid grid-cols-6 gap-2">
+                  {colours.map((p) => (
+                    <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} title={tr(p, 'name')} className="group/sw block">
+                      <div className="aspect-square overflow-hidden bg-stone ring-charcoal/40 transition group-hover/sw:ring-1"><img src={(p.swatch || p.cover)?.sm} alt={tr(p, 'name')} className="h-full w-full object-cover" loading="lazy" /></div>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+            <button type="button" onClick={() => open({ type: 'product', categories: [c.id], applications: [app] })} className="ulink mt-6 text-[11px] font-medium uppercase tracking-wide2 text-bronze">{t('requestSample')} →</button>
           </div>
         </div>
       )}
@@ -165,9 +175,9 @@ export function DetailPage() {
         <section className="wrap py-24 sm:py-32">
           <RiseText as="h2" className="h-md mb-14">{t('materialsFor')}</RiseText>
           <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-            {r.categories.map((c: Entry, i: number) => <CategoryCard key={c.id} c={c} i={i} />)}
+            {r.categories.map((c: Entry, i: number) => <CategoryCard key={c.id} c={c} i={i} app={e.id} />)}
           </div>
-          <button onClick={() => open({ type: 'product' })} className="btn btn-dark group mt-16" data-cursor="enquire"><span>{t('requestInfo')}</span><span className="arrow">→</span></button>
+          <button onClick={() => open({ type: 'product', applications: [e.id] })} className="btn btn-dark group mt-16" data-cursor="enquire"><span>{t('requestInfo')}</span><span className="arrow">→</span></button>
         </section>
       )}
     </>
