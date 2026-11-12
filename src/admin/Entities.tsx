@@ -29,7 +29,7 @@ export const TYPES: Record<string, { label: string; plural: string; publicPath?:
     ],
   },
   category: { label: 'Category', plural: 'Categories', images: true, publicPath: (e) => `/materials/${e.slug}`,
-    fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true },
+    fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'kind', label: 'Material type (small line above the name, e.g. Porcelain)', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true },
       { k: 'formats', label: 'Sizes (shown on the category page with a drawing of each slab)', type: 'formats', wide: true },
       { k: 'custom_sizes', label: 'Cut to any size (shows "Cut to any size" when no sizes are listed)', type: 'bool', wide: true }] },
   application: { label: 'Application', plural: 'Applications', images: true, publicPath: (e) => `/applications/${e.slug}`,

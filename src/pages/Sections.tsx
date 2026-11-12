@@ -73,10 +73,11 @@ function CategoryCard({ c, i }: { c: Entry; i: number }) {
   const colours: Entry[] = c.colours || [];
   return (
     <div className="group/cat relative">
-      <Tile e={c} i={i} to={lp(`/materials/${c.slug}`)} aspect="aspect-[4/3]" />
+      <Tile e={c} i={i} to={lp(`/materials/${c.slug}`)} aspect="aspect-[4/3]" label={tr(c, 'kind') || undefined} />
       {(formats.length > 0 || colours.length > 0 || c.custom_sizes) && (
         <div className="pointer-events-none absolute inset-x-0 top-0 z-20 hidden translate-y-2 opacity-0 transition-all duration-500 ease-lux group-hover/cat:pointer-events-auto group-hover/cat:translate-y-0 group-hover/cat:opacity-100 md:block">
           <div className="max-h-[440px] overflow-y-auto border border-charcoal/10 bg-ivory p-6 shadow-[0_30px_70px_rgba(29,27,25,.18)]" data-lenis-prevent>
+            {tr(c, 'kind') && <div className="eyebrow mb-2">{tr(c, 'kind')}</div>}
             <Link to={lp(`/materials/${c.slug}`)} className="font-display text-2xl">{tr(c, 'name')}</Link>
             <div className="eyebrow mb-2 mt-5">{t('formats')}</div>
             {formats.length ? (groupFormats(formats).length > 3 ? (

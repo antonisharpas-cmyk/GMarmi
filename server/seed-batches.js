@@ -531,7 +531,23 @@ async function batch15() {
   if (pools && marble) await q(`UPDATE entries SET data = json_set(json_remove(data, '$.admin_note'), '$.category_ids', json($2)), updated_at=NOW() WHERE id=$1`, [pools, JSON.stringify([marble])]);
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15 };
+// Material type shown above each category name, so brands and materials read clearly side by side
+async function batch16() {
+  const kinds = {
+    'mytop-fondovalle': ['Porcelain', 'Πορσελάνη'],
+    'rak-ceramics': ['Maximus porcelain', 'Πορσελάνη Maximus'],
+    porcelanato: ['Porcelain 15 to 20 mm', 'Πορσελάνη 15 έως 20 mm'],
+    quartz: ['Engineered quartz', 'Τεχνητός χαλαζίας'],
+    'natural-marble': ['Natural stone', 'Φυσική πέτρα'],
+    'natural-granite': ['Natural stone', 'Φυσική πέτρα'],
+  };
+  for (const [slug, [en, el]] of Object.entries(kinds)) {
+    const id = await idOf('category', slug);
+    if (id) await q(`UPDATE entries SET data = json_set(data, '$.kind_en', $2, '$.kind_el', $3), updated_at=NOW() WHERE id=$1`, [id, en, el]);
+  }
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15, 'fb-16': batch16 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);
