@@ -3,9 +3,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import type { Img } from '../lib/types';
 import { Area, Badge, Btn, Card, Field, Input, PageHead, Sel, Toggle, useLoad, useToast } from './common';
-import { ImageManager } from './Media';
+import { ImageManager, SingleImage } from './Media';
 
-type F = { k: string; label: string; type: 'text' | 'area' | 'rel' | 'multi' | 'bool' | 'lines' | 'kv' | 'choice' | 'formats'; rel?: string; choices?: string[]; bi?: boolean; hint?: string; wide?: boolean };
+type F = { k: string; label: string; type: 'text' | 'area' | 'rel' | 'multi' | 'bool' | 'lines' | 'kv' | 'choice' | 'formats' | 'catimgs'; rel?: string; choices?: string[]; bi?: boolean; hint?: string; wide?: boolean };
 
 export const TYPES: Record<string, { label: string; plural: string; publicPath?: (e: any, opts: any[]) => string; images: boolean; fields: F[] }> = {
   product: {
@@ -35,6 +35,7 @@ export const TYPES: Record<string, { label: string; plural: string; publicPath?:
   application: { label: 'Application', plural: 'Applications', images: true, publicPath: (e) => `/applications/${e.slug}`,
     fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true },
       { k: 'body', label: 'Extra text', type: 'area', bi: true, wide: true }, { k: 'category_ids', label: 'Material categories for this application', type: 'multi', rel: 'category', wide: true },
+      { k: 'category_images', label: 'Photo of each surface in this application (optional, otherwise the category photo is used)', type: 'catimgs', wide: true },
       { k: 'product_ids', label: 'Materials', type: 'multi', rel: 'product', wide: true }] },
   brand: { label: 'Brand', plural: 'Brands', images: true, fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true }] },
   faq: { label: 'FAQ', plural: 'FAQs', images: false,
@@ -141,6 +142,25 @@ export function EntityEdit() {
               return <button type="button" key={o.id} onClick={() => setData(key, on ? arr.filter((x) => x !== o.id) : [...arr, o.id])}
                 className={`border px-3 py-1.5 text-xs ${on ? 'border-charcoal bg-charcoal text-ivory' : 'border-charcoal/15 hover:border-charcoal'}`}>{o.name || o.slug}</button>;
             })}
+          </div>
+        );
+      }
+      case 'catimgs': {
+        const ids: number[] = e.data.category_ids || [];
+        const map: Record<string, number> = v || {};
+        if (!ids.length) return <p className="text-sm text-warm">Choose the material categories above first.</p>;
+        return (
+          <div className="grid gap-4 md:grid-cols-2">
+            {ids.map((cid) => (
+              <div key={cid} className="border border-charcoal/10 p-3">
+                <div className="mb-2 text-xs font-medium">{relOpts('category').find((o) => o.id === cid)?.name || cid}</div>
+                <SingleImage value={(e.cat_imgs || {})[cid] || null} onChange={(img) => {
+                  const next = { ...map }; if (img) next[cid] = img.id; else delete next[cid];
+                  setE((x: any) => ({ ...x, cat_imgs: { ...(x.cat_imgs || {}), [cid]: img } }));
+                  setData(key, next);
+                }} />
+              </div>
+            ))}
           </div>
         );
       }

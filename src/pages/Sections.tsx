@@ -68,13 +68,14 @@ function HScroll({ className, children }: { className: string; children: React.R
 /** Category tile; on desktop hover a card shows its sizes and the colours available for this application */
 function CategoryCard({ c, i }: { c: Entry; i: number }) {
   const { t, tr, lp } = useLang();
+  const { open } = useEnquiry();
   const s = useSite();
   const formats: { t: string; w: number; l: number }[] = c.formats || [];
   const colours: Entry[] = c.colours || [];
   return (
     <div className="group/cat relative">
       <Tile e={c} i={i} to={lp(`/materials/${c.slug}`)} aspect="aspect-[4/3]" label={tr(c, 'kind') || undefined} />
-      {(formats.length > 0 || colours.length > 0 || c.custom_sizes) && (
+      {(
         <div className="pointer-events-none absolute inset-x-0 top-0 z-20 hidden translate-y-2 opacity-0 transition-all duration-500 ease-lux group-hover/cat:pointer-events-auto group-hover/cat:translate-y-0 group-hover/cat:opacity-100 md:block">
           <div className="max-h-[440px] overflow-y-auto border border-charcoal/10 bg-ivory p-6 shadow-[0_30px_70px_rgba(29,27,25,.18)]" data-lenis-prevent>
             {tr(c, 'kind') && <div className="eyebrow mb-2">{tr(c, 'kind')}</div>}
@@ -112,16 +113,17 @@ function CategoryCard({ c, i }: { c: Entry; i: number }) {
             {colours.length > 0 && (
               <>
                 <div className="eyebrow mb-3 mt-6">{t('colours')}</div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-4 gap-x-3 gap-y-4">
                   {colours.map((p) => (
-                    <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} className="block">
-                      <div className="aspect-square overflow-hidden bg-stone">{p.cover && <img src={p.cover.sm} alt="" className="h-full w-full object-cover" loading="lazy" />}</div>
-                      <div className="mt-1.5 truncate text-[11px]">{tr(p, 'name')}</div>
+                    <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} className="group/sw block">
+                      <div className="aspect-square overflow-hidden bg-stone">{p.cover && <img src={p.cover.sm} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover/sw:scale-110" loading="lazy" />}</div>
+                      <div className="mt-1.5 truncate text-[11px] leading-tight">{tr(p, 'name')}</div>
                     </Link>
                   ))}
                 </div>
               </>
             )}
+            <button type="button" onClick={() => open({ type: 'product' })} className="ulink mt-6 text-[11px] font-medium uppercase tracking-wide2 text-bronze">{t('requestSample')} →</button>
           </div>
         </div>
       )}

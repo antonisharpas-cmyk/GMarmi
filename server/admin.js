@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import rateLimit from 'express-rate-limit';
 import { q, one } from './db.js';
 import { requireAuth, can, signIn, signOut, PERMS } from './auth.js';
-import { storeImage, replaceImage, mediaUrls, ALLOWED_IMG } from './media.js';
+import { storeImage, replaceImage, mediaUrls, mediaMap, ALLOWED_IMG } from './media.js';
 import { hydrate } from './public.js';
 import { sendMail } from './mail.js';
 
@@ -69,7 +69,10 @@ r.get('/entries/:type/:id', can('content'), async (req, res) => {
   const row = await one(`SELECT * FROM entries WHERE type=$1 AND id=$2`, [req.params.type, Number(req.params.id)]);
   if (!row) return res.status(404).json({ error: 'Not found' });
   const [h] = await hydrate([row]);
-  res.json({ ...row, gallery: h.gallery });
+  const ci = row.data?.category_images || {};
+  const mm = await mediaMap(Object.values(ci).filter(Number.isInteger));
+  const cat_imgs = Object.fromEntries(Object.entries(ci).map(([k, v]) => [k, mm[v] || null]));
+  res.json({ ...row, gallery: h.gallery, cat_imgs });
 });
 
 async function uniqueSlug(type, slug, id = 0) {

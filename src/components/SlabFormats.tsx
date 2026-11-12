@@ -60,18 +60,21 @@ export default function SlabFormats({ formats, custom }: { formats: Format[]; cu
   if (!formats?.length && !custom) return null;
   const max = Math.max(...formats.map((f) => Math.max(f.w, f.l)), 1);
   return (
-    <section className="border-y border-charcoal/10 bg-marble py-20">
+    <section className="bg-marble py-14">
       <div className="wrap">
-        <div className="eyebrow mb-10">{t('formats')}</div>
+        <div className="eyebrow mb-6">{t('formats')}</div>
         {custom && !formats.length && <p className="max-w-xl font-display text-3xl font-light leading-snug">{t('customSizes')}</p>}
-        <div className="grid gap-px bg-charcoal/10 sm:grid-cols-2 lg:grid-cols-3">
-          {groupFormats(formats).map((f, i) => (
-              <FadeUp key={i} delay={i * 0.05} className="bg-marble p-8">
-                <Slab w={f.w} l={f.l} t={Number(f.th[f.th.length - 1]) || 12} max={max} />
-                <SizeLabel w={f.w} l={f.l} th={f.th} className="mt-6 font-display text-2xl font-light" />
-                <div className="mt-2 text-xs text-taupe">{inch(f.w)}" × {inch(f.l)}"{f.th.length ? ` × ${f.th.map((x) => `${inchMm(Number(x))}"`).join(' / ')}` : ''}</div>
+        {/* all sizes in one row; on small screens the row scrolls sideways */}
+        <div className="slim-scroll -mx-5 overflow-x-auto px-5 pb-2 sm:mx-0 sm:px-0">
+          <div className="grid auto-cols-[minmax(max-content,1fr)] grid-flow-col divide-x divide-charcoal/10 border-y border-charcoal/10">
+            {groupFormats(formats).map((f, i) => (
+              <FadeUp key={i} delay={i * 0.05} className="px-5 py-6">
+                <Slab w={f.w} l={f.l} t={Number(f.th[f.th.length - 1]) || 12} max={max} className="h-16 w-28" />
+                <SizeLabel w={f.w} l={f.l} th={f.th} className="mt-4 font-display text-lg font-light" />
+                <div className="mt-1.5 text-[11px] text-taupe">{inch(f.w)}" × {inch(f.l)}"{f.th.length ? ` × ${f.th.map((x) => `${inchMm(Number(x))}"`).join(' / ')}` : ''}</div>
               </FadeUp>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>

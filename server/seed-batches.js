@@ -547,7 +547,39 @@ async function batch16() {
   }
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15, 'fb-16': batch16 };
+// Hover cards show a slab swatch per colour (not a kitchen photo), and each application can show
+// its own photo of a surface. Swatches below are cropped from the existing MY TOP photos.
+async function batch17() {
+  const sw = { 'travertino-ebur': 'Travertino Ebur', 'fantasy-dark': 'Fantasy Dark', magnus: 'Magnus', 'mytop-ref-04': 'MY TOP Ref. 04', 'mytop-ref-05': 'MY TOP Ref. 05', 'mytop-ref-06': 'MY TOP Ref. 06', 'mytop-ref-07': 'MY TOP Ref. 07', 'mytop-ref-08': 'MY TOP Ref. 08' };
+  for (const [slug, name] of Object.entries(sw)) {
+    const row = await one(`SELECT id, images FROM entries WHERE type='product' AND slug=$1`, [slug]);
+    if (!row) continue;
+    const imgs = Array.isArray(row.images) ? row.images : JSON.parse(row.images || '[]');
+    const m = await media(`${slug}-swatch`, `${name} slab`);
+    await q(`UPDATE entries SET images=$2, updated_at=NOW() WHERE id=$1`, [row.id, JSON.stringify([...imgs, m])]);
+  }
+  const per = {
+    bathrooms: { 'mytop-fondovalle': ['app-bathrooms-1', 'MY TOP shower wall'] },
+    'countertops-islands': { 'mytop-fondovalle': ['app-countertops-islands-1', 'MY TOP kitchen island'], 'rak-ceramics': ['cat-rak-ceramics-2', 'RAK Maximus island'], quartz: ['cat-quartz-2', 'Quartz island'] },
+    'wall-cladding': { 'mytop-fondovalle': ['app-wall-cladding-1', 'MY TOP marble look wall'] },
+    staircases: { 'natural-marble': ['app-staircases-1', 'Marble staircase'] },
+    hospitality: { 'mytop-fondovalle': ['app-hospitality-2', 'MY TOP bar counter'] },
+    pools: { 'natural-marble': ['app-pools-1', 'Marble pool steps'] },
+  };
+  for (const [app, cats] of Object.entries(per)) {
+    const row = await one(`SELECT id, data FROM entries WHERE type='application' AND slug=$1`, [app]);
+    if (!row) continue;
+    const data = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
+    const ci = { ...(data.category_images || {}) };
+    for (const [cat, [name, alt]] of Object.entries(cats)) {
+      const cid = await idOf('category', cat);
+      if (cid && !ci[cid]) ci[cid] = await media(name, alt);
+    }
+    await q(`UPDATE entries SET data = json_set(data, '$.category_images', json($2)), updated_at=NOW() WHERE id=$1`, [row.id, JSON.stringify(ci)]);
+  }
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15, 'fb-16': batch16, 'fb-17': batch17 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);
