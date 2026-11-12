@@ -579,7 +579,79 @@ async function batch17() {
   }
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15, 'fb-16': batch16, 'fb-17': batch17 };
+// Colours for Quartz, Natural Marble, Natural Granite and Porcelanato (slab photos from the partners),
+// and photos of RAK and Quartz in Bathrooms, Hospitality and Wall cladding
+async function batch18() {
+  const A = {};
+  for (const a of ['kitchens', 'bathrooms', 'countertops-islands', 'staircases', 'hospitality', 'pools', 'wall-cladding']) A[a] = await idOf('application', a);
+  const groups = [
+    ['quartz', 'quarella', ['Engineered quartz', 'Τεχνητός χαλαζίας'], ['kitchens', 'bathrooms', 'countertops-islands', 'staircases', 'hospitality'], [
+      ['qz-calacatta-oro', 'Calacatta Oro', 'White with gold veins', 'Λευκό με χρυσά νερά'],
+      ['qz-statuario-imperiale', 'Statuario Imperiale', 'White with grey veins', 'Λευκό με γκρι νερά'],
+      ['qz-calacatta-lincoln', 'Calacatta Lincoln', 'White with fine grey veins', 'Λευκό με λεπτά γκρι νερά'],
+      ['qz-grigio-ophelia', 'Grigio Ophelia', 'Dark grey', 'Σκούρο γκρι'],
+      ['qz-nero-stige', 'Nero Stige', 'Black with white veins', 'Μαύρο με λευκά νερά'],
+      ['qz-bianco-diana', 'Bianco Diana', 'Bright white', 'Φωτεινό λευκό'],
+    ]],
+    ['natural-marble', 'sachanas-marble', ['Natural marble', 'Φυσικό μάρμαρο'], ['staircases', 'pools'], [
+      ['mb-thassos', 'Thassos', 'Pure white', 'Καθαρό λευκό'],
+      ['mb-thassos-venato', 'Thassos Venato', 'White with soft veins', 'Λευκό με απαλά νερά'],
+      ['mb-arabescato', 'Arabescato', 'White and grey', 'Λευκό και γκρι'],
+      ['mb-penteliko', 'Penteliko', 'White with linear veins', 'Λευκό με γραμμικά νερά'],
+      ['mb-fusion', 'Fusion', 'White with grey and beige waves', 'Λευκό με γκρι και μπεζ κύματα'],
+      ['mb-selas-pink', 'Selas Pink', 'Pink', 'Ροζ'],
+      ['mb-mokka-beige', 'Mokka Beige', 'Beige', 'Μπεζ'],
+      ['mb-nero-damas', 'Nero Damas', 'Black', 'Μαύρο'],
+    ]],
+    ['natural-granite', 'rekalis-marble', ['Natural granite', 'Φυσικός γρανίτης'], ['kitchens', 'bathrooms', 'countertops-islands', 'staircases', 'hospitality'], [
+      ['gr-blanco-halayeb', 'Blanco Halayeb', 'White and black', 'Λευκό και μαύρο'],
+      ['gr-new-halayeb', 'New Halayeb', 'Grey and black', 'Γκρι και μαύρο'],
+      ['gr-karnak-grey', 'Karnak Grey', 'Grey', 'Γκρι'],
+      ['gr-rosa-nasr', 'Rosa Nasr', 'Pink', 'Ροζ'],
+    ]],
+    ['porcelanato', null, ['Porcelain', 'Πορσελάνη'], ['staircases'], [
+      ['pc-brazil-lite', 'Brazil Lite', 'Light grey stone', 'Ανοιχτό γκρι πέτρα'],
+      ['pc-onyx-grey', 'Onyx Grey', 'Light onyx', 'Ανοιχτό όνυχα'],
+      ['pc-calacatta-beige', 'Calacatta Beige', 'Ivory with beige veins', 'Ιβουάρ με μπεζ νερά'],
+      ['pc-grey-marble', 'Grey Marble', 'Grey with gold veins', 'Γκρι με χρυσά νερά'],
+    ]],
+  ];
+  for (const [catSlug, brandSlug, [men, mel], apps, list] of groups) {
+    const cat = await idOf('category', catSlug);
+    if (!cat) continue;
+    const brand = brandSlug ? await idOf('brand', brandSlug) : null;
+    for (const [slug, name, cen, cel] of list) {
+      if (await idOf('product', slug)) continue;
+      const img = await media(`${slug}-swatch`, `${name} slab`);
+      const data = {
+        name_en: name, name_el: name, category_id: cat, brand_id: brand,
+        tagline_en: `${cen}.`, tagline_el: `${cel}.`, desc_en: '', desc_el: '',
+        features_en: [], features_el: [], specs_extra: [],
+        specs: { material_en: men, material_el: mel, colour_en: cen, colour_el: cel },
+        application_ids: apps.map((a) => A[a]).filter(Boolean),
+      };
+      await q(`INSERT INTO entries (type, slug, sort_order, data, images, cover_id, published) VALUES ('product',$1,$2,$3,$4,$5,TRUE)`,
+        [slug, await nextSort('product'), JSON.stringify(data), JSON.stringify([img]), img]);
+    }
+  }
+  const per = {
+    bathrooms: { quartz: ['appcat-bathrooms-quartz', 'Quartz bathroom'], 'rak-ceramics': ['appcat-bathrooms-rak', 'RAK Maximus bathroom'] },
+    hospitality: { quartz: ['appcat-hospitality-quartz', 'Quartz floor in a hotel restaurant'], 'rak-ceramics': ['appcat-hospitality-rak', 'RAK Maximus cafe wall'] },
+    'wall-cladding': { 'rak-ceramics': ['appcat-wall-rak', 'RAK Maximus marble look wall'] },
+  };
+  for (const [app, cats] of Object.entries(per)) {
+    const row = await one(`SELECT id, data FROM entries WHERE type='application' AND slug=$1`, [app]);
+    if (!row) continue;
+    const ci = { ...((typeof row.data === 'string' ? JSON.parse(row.data) : row.data).category_images || {}) };
+    for (const [cat, [name, alt]] of Object.entries(cats)) {
+      const cid = await idOf('category', cat);
+      if (cid && !ci[cid]) ci[cid] = await media(name, alt);
+    }
+    await q(`UPDATE entries SET data = json_set(data, '$.category_images', json($2)), updated_at=NOW() WHERE id=$1`, [row.id, JSON.stringify(ci)]);
+  }
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15, 'fb-16': batch16, 'fb-17': batch17, 'fb-18': batch18 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);

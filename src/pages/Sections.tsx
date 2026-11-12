@@ -112,15 +112,29 @@ function CategoryCard({ c, i }: { c: Entry; i: number }) {
             )) : <p className="text-sm text-warm">{t('customSizes')}</p>}
             {colours.length > 0 && (
               <>
-                <div className="eyebrow mb-3 mt-6">{t('colours')}</div>
-                <div className="grid grid-cols-4 gap-x-3 gap-y-4">
+                {/* examples: each colour shown in a real space */}
+                <div className="eyebrow mb-3 mt-6">{t('examples')}</div>
+                <div className="grid grid-cols-3 gap-3">
                   {colours.map((p) => (
-                    <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} className="group/sw block">
-                      <div className="aspect-square overflow-hidden bg-stone">{p.cover && <img src={p.cover.sm} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover/sw:scale-110" loading="lazy" />}</div>
-                      <div className="mt-1.5 truncate text-[11px] leading-tight">{tr(p, 'name')}</div>
+                    <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} className="block">
+                      <div className="aspect-square overflow-hidden bg-stone">{p.cover && <img src={p.cover.sm} alt="" className="h-full w-full object-cover" loading="lazy" />}</div>
+                      <div className="mt-1.5 truncate text-[11px]">{tr(p, 'name')}</div>
                     </Link>
                   ))}
                 </div>
+                {/* colours: the slab of each colour, small, so many can be shown */}
+                {colours.some((p) => p.swatch && p.swatch.sm !== p.cover?.sm) && (
+                  <>
+                    <div className="eyebrow mb-3 mt-6">{t('colours')}</div>
+                    <div className="grid grid-cols-6 gap-2">
+                      {colours.filter((p) => p.swatch && p.swatch.sm !== p.cover?.sm).map((p) => (
+                        <Link key={p.id} to={lp(productPath({ ...p, category_id: c.id } as Entry, s?.categories))} title={tr(p, 'name')} className="group/sw block">
+                          <div className="aspect-square overflow-hidden bg-stone ring-charcoal/40 transition group-hover/sw:ring-1"><img src={p.swatch.sm} alt={tr(p, 'name')} className="h-full w-full object-cover" loading="lazy" /></div>
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                )}
               </>
             )}
             <button type="button" onClick={() => open({ type: 'product' })} className="ulink mt-6 text-[11px] font-medium uppercase tracking-wide2 text-bronze">{t('requestSample')} →</button>

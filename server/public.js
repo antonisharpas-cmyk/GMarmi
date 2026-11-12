@@ -98,7 +98,7 @@ r.get('/entries/:type/:slug', async (req, res) => {
       const inCat = products.filter((p) => p.category_id === c.id);
       const mine = inCat.filter((p) => linked.some((l) => l.id === p.id));
       const list = mine.length ? mine : inCat;
-      return { ...c, cover: cim[ci[c.id]] || c.cover, colours: list.map((p) => ({ id: p.id, slug: p.slug, name_en: p.name_en, name_el: p.name_el, cover: swatch(p) })) };
+      return { ...c, cover: cim[ci[c.id]] || c.cover, colours: list.map((p) => ({ id: p.id, slug: p.slug, name_en: p.name_en, name_el: p.name_el, cover: p.cover, swatch: swatch(p) })) };
     });
     related.products = products.filter((p) => (item.product_ids || []).includes(p.id) || (p.application_ids || []).includes(item.id));
   }
