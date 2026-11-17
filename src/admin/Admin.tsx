@@ -47,8 +47,8 @@ function Dashboard() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stat('New enquiries', d.enquiries.new, '/admin/enquiries')}{stat('Unread enquiries', d.enquiries.unread, '/admin/enquiries')}
         {stat('Open chats', d.chats.open, '/admin/chat')}{stat('Unread chat messages', d.chats.unread, '/admin/chat')}
-        {stat('Products', d.counts.product, '/admin/content/product')}{stat('Applications', d.counts.application, '/admin/content/application')}
-        {stat('Brands', d.counts.brand, '/admin/content/brand')}{stat('Categories', d.counts.category, '/admin/content/category')}
+        {stat('Colours', d.counts.product, '/admin/content/product')}{stat('Applications', d.counts.application, '/admin/content/application')}
+        {stat('Brands', d.counts.brand, '/admin/content/brand')}{stat('Surfaces', d.counts.category, '/admin/content/category')}
       </div>
       <div className="mt-6 grid gap-6 xl:grid-cols-3">
         <Card title="Recent enquiries" className="xl:col-span-2" action={<Link to="/admin/enquiries" className="text-xs underline">All</Link>}>
@@ -60,7 +60,7 @@ function Dashboard() {
           )) : <p className="text-sm text-taupe">No enquiries yet.</p>}
         </Card>
         <Card title="Last 30 days">
-          {[['Page views', 'page_view'], ['Material views', 'product_view'], ['Enquiries sent', 'enquiry_submit'], ['Quote requests', 'quote_request'], ['Phone clicks', 'phone_click'], ['Chats started', 'chat_start']].map(([l, k]) => (
+          {[['Page views', 'page_view'], ['Colour views', 'product_view'], ['Enquiries sent', 'enquiry_submit'], ['Quote requests', 'quote_request'], ['Phone clicks', 'phone_click'], ['Chats started', 'chat_start']].map(([l, k]) => (
             <div key={k} className="flex justify-between py-1 text-sm"><span className="text-warm">{l}</span>{ev[k] || 0}</div>
           ))}
         </Card>

@@ -13,10 +13,10 @@ const TABS: Record<string, { title: string; key: string; groups: G[] }> = {
     { title: 'Sections (drag to reorder, toggle to hide)', fields: [{ k: 'sections', label: '', t: 'sections' }] },
     { section: 'hero', title: 'Hero', fields: [{ k: 'hero_image', label: 'Hero image', t: 'img' }, { k: 'hero_kicker', label: 'Small line above title', t: 'text', bi: true }, { k: 'hero_title', label: 'Title', t: 'text', bi: true }, { k: 'hero_sub', label: 'Subtitle', t: 'area', bi: true }, { k: 'cta_primary', label: 'Primary button', t: 'text', bi: true }, { k: 'cta_secondary', label: 'Secondary button', t: 'text', bi: true }] },
     { section: 'intro', title: 'Stone. Surface. Space.', fields: [{ k: 'intro_words', label: 'Three words (one per line)', t: 'lines', bi: true }, { k: 'intro_images', label: 'Three images, in order', t: 'imgs' }] },
-    { section: 'materials', title: 'Materials (horizontal)', fields: [], note: { text: 'Shows the published material categories, in the order set under Categories.', to: '/admin/content/category', label: 'Edit categories' } },
+    { section: 'materials', title: 'Surfaces (horizontal)', fields: [], note: { text: 'Shows the published surfaces, in the order set under Surfaces.', to: '/admin/content/category', label: 'Edit surfaces' } },
     { section: 'story', title: 'Material story', fields: [{ k: 'story_image', label: 'Image', t: 'img' }, { k: 'story_lines', label: 'Lines (first is small, last is the link)', t: 'lines', bi: true }] },
     { section: 'applications', title: 'Applications', fields: [], note: { text: 'Shows the first six published applications, in the order set under Applications.', to: '/admin/content/application', label: 'Edit applications' } },
-    { section: 'showcase', title: 'Featured materials', fields: [{ k: 'featured_products', label: 'Featured materials (in this order)', t: 'multi', rel: 'product' }] },
+    { section: 'showcase', title: 'Featured colours', fields: [{ k: 'featured_products', label: 'Featured colours (in this order)', t: 'multi', rel: 'product' }] },
     { section: 'why', title: 'Why GM Andreou Marmi', fields: [{ k: 'why', label: '', t: 'why' }] },
     { section: 'cta', title: 'Final call to action', fields: [{ k: 'cta_title', label: 'Title', t: 'text', bi: true }, { k: 'cta_button', label: 'Button', t: 'text', bi: true }, { k: 'cta_image', label: 'Background image', t: 'img' }] },
   ] },
@@ -37,7 +37,7 @@ const TABS: Record<string, { title: string; key: string; groups: G[] }> = {
     { title: 'Terms & Conditions', fields: [{ k: 'terms', label: 'Text', t: 'area', bi: true, rows: 10 }] },
   ] },
 };
-const SECTION_NAMES: Record<string, string> = { hero: 'Hero', intro: 'Stone. Surface. Space.', materials: 'Materials (horizontal)', story: 'Material story', applications: 'Applications', showcase: 'Featured materials', why: 'Why GM Andreou Marmi', cta: 'Final call to action' };
+const SECTION_NAMES: Record<string, string> = { hero: 'Hero', intro: 'Stone. Surface. Space.', materials: 'Surfaces (horizontal)', story: 'Material story', applications: 'Applications', showcase: 'Featured materials', why: 'Why GM Andreou Marmi', cta: 'Final call to action' };
 
 export default function Content() {
   const { tab = 'home' } = useParams();

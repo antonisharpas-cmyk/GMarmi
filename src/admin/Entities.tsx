@@ -9,7 +9,7 @@ type F = { k: string; label: string; type: 'text' | 'area' | 'rel' | 'multi' | '
 
 export const TYPES: Record<string, { label: string; plural: string; publicPath?: (e: any, opts: any[]) => string; images: boolean; fields: F[] }> = {
   product: {
-    label: 'Product', plural: 'Products', images: true,
+    label: 'Colour', plural: 'Colours', images: true,
     publicPath: (e, o) => `/materials/${o.find((x) => x.id === e.data.category_id)?.slug || 'all'}/${e.slug}`,
     fields: [
       { k: 'name', label: 'Name', type: 'text', bi: true },
@@ -28,16 +28,16 @@ export const TYPES: Record<string, { label: string; plural: string; publicPath?:
       { k: 'specs_extra', label: 'Additional specifications', type: 'kv', wide: true },
     ],
   },
-  category: { label: 'Category', plural: 'Categories', images: true, publicPath: (e) => `/materials/${e.slug}`,
+  category: { label: 'Surface', plural: 'Surfaces', images: true, publicPath: (e) => `/materials/${e.slug}`,
     fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'kind', label: 'Material type (small line above the name, e.g. Porcelain)', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true },
       { k: 'formats', label: 'Sizes (shown on the category page with a drawing of each slab)', type: 'formats', wide: true },
       { k: 'custom_sizes', label: 'Cut to any size (shows "Cut to any size" when no sizes are listed)', type: 'bool', wide: true }] },
   application: { label: 'Application', plural: 'Applications', images: true, publicPath: (e) => `/applications/${e.slug}`,
     fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true },
-      { k: 'body', label: 'Extra text', type: 'area', bi: true, wide: true }, { k: 'category_ids', label: 'Material categories for this application', type: 'multi', rel: 'category', wide: true },
+      { k: 'body', label: 'Extra text', type: 'area', bi: true, wide: true }, { k: 'category_ids', label: 'Surfaces for this application', type: 'multi', rel: 'category', wide: true },
       { k: 'category_examples', label: 'Example photos of each surface in this application (shown when hovering the surface)', type: 'catgals', wide: true },
       { k: 'category_images', label: 'Photo of each surface in this application (optional, otherwise the category photo is used)', type: 'catimgs', wide: true },
-      { k: 'product_ids', label: 'Materials', type: 'multi', rel: 'product', wide: true }] },
+      { k: 'product_ids', label: 'Colours (optional, every colour of the chosen surfaces is shown anyway)', type: 'multi', rel: 'product', wide: true }] },
   brand: { label: 'Brand', plural: 'Brands', images: true, fields: [{ k: 'name', label: 'Name', type: 'text', bi: true }, { k: 'desc', label: 'Description', type: 'area', bi: true, wide: true }] },
   faq: { label: 'FAQ', plural: 'FAQs', images: false,
     fields: [{ k: 'category', label: 'Category', type: 'choice', choices: ['materials', 'products', 'orders', 'showroom', 'general'] },
@@ -149,7 +149,7 @@ export function EntityEdit() {
       case 'catimgs': {
         const ids: number[] = e.data.category_ids || [];
         const map: Record<string, number> = v || {};
-        if (!ids.length) return <p className="text-sm text-warm">Choose the material categories above first.</p>;
+        if (!ids.length) return <p className="text-sm text-warm">Choose the surfaces above first.</p>;
         return (
           <div className="grid gap-4 md:grid-cols-2">
             {ids.map((cid) => (
@@ -168,7 +168,7 @@ export function EntityEdit() {
       case 'catgals': {
         const ids: number[] = e.data.category_ids || [];
         const map: Record<string, number[]> = v || {};
-        if (!ids.length) return <p className="text-sm text-warm">Choose the material categories above first.</p>;
+        if (!ids.length) return <p className="text-sm text-warm">Choose the surfaces above first.</p>;
         return (
           <div className="space-y-4">
             {ids.map((cid) => (

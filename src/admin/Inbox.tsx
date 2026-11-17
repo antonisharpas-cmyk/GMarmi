@@ -25,7 +25,7 @@ export function Enquiries() {
       <div className="overflow-x-auto border border-charcoal/10 bg-white">
         <table className="w-full min-w-[820px] text-sm">
           <thead><tr className="border-b border-charcoal/10 text-left text-[10px] uppercase tracking-wide2 text-warm">
-            {['Ref', 'Date', 'Name', 'Type', 'Product', 'Status', 'Assigned'].map((h) => <th key={h} className="px-4 py-3 font-medium">{h}</th>)}
+            {['Ref', 'Date', 'Name', 'Type', 'Surfaces', 'Status', 'Assigned'].map((h) => <th key={h} className="px-4 py-3 font-medium">{h}</th>)}
           </tr></thead>
           <tbody>
             {data?.map((e) => (
@@ -97,7 +97,7 @@ export function EnquiryDetail() {
           </Card>
           <Card title="Customer">
             <dl className="space-y-3 text-sm">
-              {[['Name', e.name], ['Company', e.company], ['Email', e.email], ['Phone', e.phone], ['Type', ENQ_TYPES[e.enquiry_type]], ['Product', e.product_name], ['Project', e.project_type], ['Language', e.lang === 'el' ? 'Greek' : 'English'], ['Source', e.source], ['Received', fmtDate(e.created_at)]].filter(([, v]) => v).map(([k, v]) => (
+              {[['Name', e.name], ['Company', e.company], ['Email', e.email], ['Phone', e.phone], ['Type', ENQ_TYPES[e.enquiry_type]], ['Surfaces', e.product_name], ['Applications', e.project_type], ['Language', e.lang === 'el' ? 'Greek' : 'English'], ['Source', e.source], ['Received', fmtDate(e.created_at)]].filter(([, v]) => v).map(([k, v]) => (
                 <div key={k} className="grid grid-cols-3 gap-2"><dt className="text-warm">{k}</dt><dd className="col-span-2 break-words">{k === 'Email' ? <a className="underline" href={`mailto:${v}`}>{v}</a> : k === 'Phone' ? <a className="underline" href={`tel:${v}`}>{v}</a> : v}</dd></div>
               ))}
             </dl>

@@ -154,9 +154,11 @@ function CategoryCard({ c, i, app }: { c: Entry; i: number; app: number }) {
   return (
     <div className="group/cat relative">
       <Tile e={c} i={i} to={lp(`/materials/${c.slug}`)} aspect="aspect-[4/3]" label={tr(c, 'kind') || undefined} />
-      <button type="button" onClick={() => setSheet(true)} className="mt-4 flex items-center gap-2 border border-charcoal/20 px-4 py-2.5 text-[11px] font-medium uppercase tracking-wide2 md:hidden">
-        <span className="flex -space-x-1.5">{colours.slice(0, 4).map((p) => <img key={p.id} src={(p.swatch || p.cover)?.sm} alt="" className="h-5 w-5 rounded-full border border-ivory object-cover" />)}</span>
-        {t('examples')} · {t('colours')} <span aria-hidden>+</span>
+      {/* a small button on the photo: on phones it opens the overview, on desktop it shows there is more and hovering opens it */}
+      <button type="button" onClick={() => setSheet(true)} aria-label={`${t('examples')} · ${t('colours')}`}
+        className="absolute right-3 top-3 z-10 flex items-center gap-2 rounded-full bg-ivory/90 py-1.5 pl-1.5 pr-3.5 text-[10px] font-medium uppercase tracking-wide2 text-charcoal shadow-[0_6px_20px_rgba(18,17,16,.18)] backdrop-blur">
+        <span className="flex -space-x-1.5">{colours.slice(0, 3).map((p) => <img key={p.id} src={(p.swatch || p.cover)?.sm} alt="" className="h-6 w-6 rounded-full border-2 border-ivory object-cover" />)}</span>
+        {t('colours')} <span aria-hidden className="text-sm leading-none">+</span>
       </button>
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 hidden translate-y-2 opacity-0 transition-all duration-500 ease-lux group-hover/cat:pointer-events-auto group-hover/cat:translate-y-0 group-hover/cat:opacity-100 md:block">
         <div className="max-h-[440px] overflow-y-auto border border-charcoal/10 bg-ivory p-6 shadow-[0_30px_70px_rgba(29,27,25,.18)]" data-lenis-prevent>
