@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import rateLimit from 'express-rate-limit';
 import { q, one } from './db.js';
 import { mediaMap } from './media.js';
-import { sendMail, customerConfirmation, adminNotification } from './mail.js';
+import { sendMail, customerConfirmation, adminNotification, chatNotification } from './mail.js';
 
 const r = express.Router();
 const TYPES = ['category', 'brand', 'application', 'product', 'faq'];
@@ -189,6 +189,7 @@ r.post('/chat/start', chatLimiter, async (req, res) => {
   const c = await one(`INSERT INTO chat_conversations (token,name,email,phone,page,lang,unread_admin) VALUES ($1,$2,$3,$4,$5,$6,1) RETURNING id`,
     [token, name.slice(0, 120), email.slice(0, 200), phone.slice(0, 60), String(page).slice(0, 200), lang === 'el' ? 'el' : 'en']);
   await q(`INSERT INTO chat_messages (conversation_id, sender, body) VALUES ($1,'visitor',$2)`, [c.id, message.slice(0, 2000)]);
+  notifyChat(c.id, message.slice(0, 2000), true);
   res.json({ ok: true, token });
 });
 r.get('/chat/:token', async (req, res) => {
@@ -203,10 +204,22 @@ r.post('/chat/:token', chatLimiter, async (req, res) => {
   if (!c) return res.status(404).json({ error: 'Not found' });
   const body = String(req.body?.body || '').trim().slice(0, 2000);
   if (!body) return res.status(400).json({ error: 'Empty' });
+  // email again only when the conversation was quiet for 15 minutes, so a fast chat does not flood the inbox
+  const prev = await one(`SELECT created_at FROM chat_messages WHERE conversation_id=$1 ORDER BY id DESC LIMIT 1`, [c.id]);
+  if (!prev || Date.now() - new Date(prev.created_at).getTime() > 15 * 60 * 1000) notifyChat(c.id, body, false);
   const m = await one(`INSERT INTO chat_messages (conversation_id, sender, body) VALUES ($1,'visitor',$2) RETURNING id, sender, body, created_at`, [c.id, body]);
   await q(`UPDATE chat_conversations SET unread_admin=unread_admin+1, last_message_at=NOW(), status=CASE WHEN status='closed' THEN 'waiting' ELSE status END WHERE id=$1`, [c.id]);
   res.json(m);
 });
+
+async function notifyChat(id, body, first) {
+  try {
+    const c = await one(`SELECT id, name, email, phone, page, lang FROM chat_conversations WHERE id=$1`, [id]);
+    const site = await getSetting('site');
+    const m = chatNotification(c, body, `${process.env.PUBLIC_URL || ''}/admin/chat/${id}`, first);
+    await sendMail({ to: process.env.NOTIFY_EMAIL || site.email, subject: m.subject, html: m.html, replyTo: c.email || undefined });
+  } catch (e) { console.error('[chat] notify failed', e.message); }
+}
 
 // ---------- Analytics (first party, privacy friendly) ----------
 const EVENTS = ['page_view', 'material_view', 'product_view', 'enquiry_submit', 'quote_request', 'contact_click', 'phone_click', 'email_click', 'chat_start', 'download', 'cta_click'];

@@ -238,7 +238,7 @@ export function Legal({ k }: { k: 'privacy' | 'cookies' | 'terms' }) {
     <>
       <PageTitle eyebrow={t('legal')} title={title} />
       <section className="wrap max-w-3xl pb-32">
-        {!data ? <Loading /> : <div className="prose-gm">{(data[lang] || data.en).split(/\n\n+/).map((p, i) => <p key={i}>{p}</p>)}</div>}
+        {!data ? <Loading /> : <div className="prose-gm">{(data[lang] || data.en).split(/\n\n+/).map((p, i) => (p.startsWith('## ') ? <h2 key={i}>{p.slice(3)}</h2> : <p key={i}>{p}</p>))}</div>}
       </section>
     </>
   );

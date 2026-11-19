@@ -1,6 +1,7 @@
 // Content batches added after the first seed. Each batch runs once per database
 // (tracked in settings.seed.batches), so it works on a fresh database and on one already in use.
 import { q, one } from './db.js';
+import { LEGAL } from './legal-texts.js';
 
 async function media(name, alt) {
   const r = await one(
@@ -818,7 +819,16 @@ async function batch24() {
   await q(`UPDATE entries SET data = json_set(data, '$.specs.dimensions', '120 x 278 cm, 162 x 324 cm'), updated_at=NOW() WHERE type='product' AND slug='rak-moon-stone'`);
 }
 
-const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15, 'fb-16': batch16, 'fb-17': batch17, 'fb-18': batch18, 'fb-19': batch19, 'fb-20': batch20, 'fb-21': batch21, 'fb-22': batch22, 'fb-23': batch23, 'fb-24': batch24 };
+// Batch 25: full texts for Privacy Policy, Cookie Policy and Terms of Use
+async function batch25() {
+  const row = await one(`SELECT value FROM settings WHERE key='legal'`);
+  const cur = row ? (typeof row.value === 'string' ? JSON.parse(row.value) : row.value) : {};
+  const value = JSON.stringify({ ...cur, ...LEGAL });
+  if (row) await q(`UPDATE settings SET value=$1, updated_at=NOW() WHERE key='legal'`, [value]);
+  else await q(`INSERT INTO settings (key, value) VALUES ('legal', $1)`, [value]);
+}
+
+const BATCHES = { 'fb-2': batch2, 'fb-3': batch3, 'fb-4': batch4, 'fb-5': batch5, 'fb-6': batch6, 'fb-7': batch7, 'fb-8': batch8, 'fb-9': batch9, 'fb-10': batch10, 'fb-11': batch11, 'fb-12': batch12, 'fb-13': batch13, 'fb-14': batch14, 'fb-15': batch15, 'fb-16': batch16, 'fb-17': batch17, 'fb-18': batch18, 'fb-19': batch19, 'fb-20': batch20, 'fb-21': batch21, 'fb-22': batch22, 'fb-23': batch23, 'fb-24': batch24, 'fb-25': batch25 };
 
 export async function applySeedBatches() {
   const row = await one(`SELECT value FROM settings WHERE key='seed'`);
