@@ -8,6 +8,7 @@ import { Picture, Reveal, RiseText, FadeUp } from '../components/Reveal';
 import { Lightbox, Loading, NotFoundBlock, ProductGrid, useTitle, variantAt } from '../components/ui';
 import { useEnquiry } from '../components/EnquiryDrawer';
 import type { Entry } from '../lib/types';
+import { groupFormats } from '../components/SlabFormats';
 
 export default function Product() {
   const { slug } = useParams();
@@ -37,7 +38,9 @@ export default function Product() {
     [t('brand'), r.brand ? tr(r.brand, 'name') : ''],
     [t('finish'), tr(p.specs, 'finish')],
     [t('thickness'), p.specs?.thickness],
-    [t('dimensions'), p.specs?.dimensions],
+    // colours without their own sizes show the sizes of their surface, so every page matches
+    [t('dimensions'), p.specs?.dimensions || (r.category?.custom_sizes ? t('customSizes')
+      : groupFormats(r.category?.formats || []).map((f) => `${f.w} x ${f.l} cm (${f.th.join(', ')} mm)`).join(' · '))],
     [t('colour'), tr(p.specs, 'colour')],
     ...((p.specs_extra || []) as any[]).map((x) => [x[`label_${lang}`] || x.label_en, x[`value_${lang}`] || x.value_en]),
   ] as [string, string][]).filter(([, v]) => v);
